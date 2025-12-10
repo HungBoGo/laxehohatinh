@@ -1744,6 +1744,11 @@
                 input.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
                 console.error('Reverse geocoding error:', error);
             }
+
+            // Cập nhật summary
+            if (typeof updateSummary === 'function') {
+                updateSummary();
+            }
         }
 
         async function updateRoute() {
@@ -1899,10 +1904,15 @@
                         input.value = data.display_name || `${latitude}, ${longitude}`;
                         input.dataset.lat = latitude;
                         input.dataset.lng = longitude;
-                        
+
                         setMarker(type, latitude, longitude);
                         updateRoute();
                         showToast('Đã lấy vị trí thành công!');
+
+                        // Cập nhật summary
+                        if (typeof updateSummary === 'function') {
+                            updateSummary();
+                        }
                     } catch (error) {
                         console.error('Reverse geocoding error:', error);
                         showToast('Không thể lấy địa chỉ');
@@ -2213,6 +2223,11 @@
                 updateRoute();
 
                 showToast(`✅ Đã đặt ${type === 'pickup' ? 'điểm đón' : 'điểm đến'}`);
+
+                // Cập nhật summary
+                if (typeof updateSummary === 'function') {
+                    updateSummary();
+                }
             } catch (error) {
                 console.error('Reverse geocoding error:', error);
                 const input = document.getElementById(type + 'Input');
@@ -2312,6 +2327,11 @@
                         gpsConfirmModal.classList.remove('show');
 
                         showToast('✅ Đã đặt điểm đón tại vị trí hiện tại!');
+
+                        // Cập nhật summary
+                        if (typeof updateSummary === 'function') {
+                            updateSummary();
+                        }
 
                         // Focus vào ô điểm đến
                         setTimeout(() => {
