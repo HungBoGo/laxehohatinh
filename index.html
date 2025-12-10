@@ -544,7 +544,12 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
+
+        /* Ẩn summary trên desktop - chỉ hiện trên mobile */
+        .form-summary {
+            display: none !important;
+        }
+
         /* Responsive - Grab Style Layout */
         @media (max-width: 900px) {
             body {
@@ -673,7 +678,7 @@
             }
 
             .sidebar.collapsed .form-summary {
-                display: block;
+                display: block !important;
             }
 
             /* Expanded state - Mở rộng */
