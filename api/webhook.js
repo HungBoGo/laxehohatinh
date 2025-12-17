@@ -1,5 +1,19 @@
 // Vercel Serverless Function to handle Zalo webhooks
 
+const crypto = require('crypto');
+
+const ZALO_CONFIG = {
+  OA_SECRET_KEY: 'OBvtjaA56TkVEcTQRURf'
+};
+
+// Verify Zalo webhook signature
+function verifySignature(data, signature) {
+  const hmac = crypto.createHmac('sha256', ZALO_CONFIG.OA_SECRET_KEY);
+  hmac.update(JSON.stringify(data));
+  const calculatedSignature = hmac.digest('hex');
+  return calculatedSignature === signature;
+}
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -21,6 +35,13 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const event = req.body;
+
+      // Verify signature if provided
+      const signature = req.headers['x-zevent-signature'];
+      if (signature && !verifySignature(event, signature)) {
+        console.error('Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
 
       console.log('Zalo webhook event received:', event);
 
