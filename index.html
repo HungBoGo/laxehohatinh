@@ -1486,11 +1486,28 @@
         // KHỞI TẠO BẢN ĐỒ
         // =============================================
         const map = L.map('map').setView([CONFIG.CENTER_LAT, CONFIG.CENTER_LNG], CONFIG.DEFAULT_ZOOM);
-        
-        // Thêm Goong Maps tile layer
-        L.tileLayer('https://tiles.goong.io/assets/osm_tiles/{z}/{x}/{y}.png?api_key=8t5mLkG10CN7rlDgLdVbASP0qqF9Wx7iw2Cqyuav', {
-            attribution: '© Goong Maps'
-        }).addTo(map);
+
+        // Thêm Goong Maps tile layer with fallback
+        const goongTiles = L.tileLayer('https://tiles.goong.io/assets/osm_tiles/{z}/{x}/{y}.png?api_key=8t5mLkG10CN7rlDgLdVbASP0qqF9Wx7iw2Cqyuav', {
+            attribution: '© Goong Maps',
+            maxZoom: 19
+        });
+
+        const osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        // Try Goong first, fallback to OSM on error
+        goongTiles.on('tileerror', function() {
+            console.warn('Goong tiles failed, using OpenStreetMap fallback');
+            if (!map.hasLayer(osmTiles)) {
+                map.removeLayer(goongTiles);
+                osmTiles.addTo(map);
+            }
+        });
+
+        goongTiles.addTo(map);
 
         // Markers
         let pickupMarker = null;
