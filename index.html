@@ -2107,9 +2107,9 @@
             // Lưu đơn hàng vào localStorage (để admin và driver xem)
             const order = {
                 id: orderId,
-                pickup: orderData.pickup,
-                dropoff: orderData.dropoff,
-                phone: orderData.phone,
+                pickup: orderData.pickup.address,
+                dropoff: orderData.dropoff ? orderData.dropoff.address : '',
+                phone: orderData.customer.phone,
                 price: orderData.price.toLocaleString('vi-VN') + 'đ',
                 distance: orderData.distance.toFixed(1) + ' km',
                 status: 'new',
