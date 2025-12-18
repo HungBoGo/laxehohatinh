@@ -688,6 +688,7 @@
         <div class="tab-navigation">
             <button class="tab-btn active" onclick="switchTab('orders')">📋 Đơn hàng</button>
             <button class="tab-btn" onclick="switchTab('drivers')">👥 Tài xế</button>
+            <button class="tab-btn" onclick="switchTab('admins')" id="adminsTabBtn" style="display:none;">🔐 Quản trị</button>
         </div>
 
         <div id="ordersTab" class="tab-content active">
@@ -701,6 +702,14 @@
             <div class="drivers-section">
                 <h2 style="margin-bottom: 20px; color: #333;">👥 Quản lý tài xế</h2>
                 <div id="driversList"></div>
+            </div>
+        </div>
+
+        <div id="adminsTab" class="tab-content">
+            <div class="admins-section">
+                <h2 style="margin-bottom: 20px; color: #333;">🔐 Quản lý quản trị viên</h2>
+                <button class="btn" onclick="openAddAdminModal()" style="margin-bottom: 16px; background: #2ECC71;">➕ Thêm quản trị viên</button>
+                <div id="adminsList"></div>
             </div>
         </div>
 
@@ -735,18 +744,47 @@
                 </form>
             </div>
         </div>
+
+        <!-- Add Admin Modal -->
+        <div id="addAdminModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>➕ Thêm quản trị viên</h2>
+                    <button class="close-btn" onclick="closeAddAdminModal()">&times;</button>
+                </div>
+                <form id="addAdminForm">
+                    <div class="form-group">
+                        <label>Tên đăng nhập *</label>
+                        <input type="text" id="newAdminUsername" required placeholder="VD: nguyenvana">
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu * (ít nhất 8 ký tự)</label>
+                        <input type="password" id="newAdminPassword" required minlength="8" placeholder="Nhập mật khẩu">
+                    </div>
+                    <div class="form-group">
+                        <label>Vai trò *</label>
+                        <select id="newAdminRole" required style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                            <option value="admin">Admin - Quản lý đơn hàng, tài xế, thống kê</option>
+                            <option value="moderator">Moderator - Chỉ xem và xử lý đơn hàng</option>
+                        </select>
+                    </div>
+                    <div id="addAdminError" style="display: none; color: #e74c3c; margin-top: 10px; padding: 10px; background: #fee; border-radius: 8px;"></div>
+                    <button type="submit" class="submit-order-btn" style="background: #2ECC71;">✅ Tạo tài khoản</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Admin credentials (production nên lưu ở server)
-        const ADMIN_CREDENTIALS = {
-            username: 'admin',
-            password: 'admin123' // Bạn nên đổi password này
-        };
+        // Secure API Configuration
+        const API_BASE = 'https://server-g1bxkeen8-hubogos-projects.vercel.app';
+        let authToken = localStorage.getItem('adminToken');
 
         // Mock orders data (sẽ thay bằng API sau)
         let orders = [];
         let drivers = [];
+        let admins = [];
+        let currentUser = null;
 
         // Switch tabs
         function switchTab(tab) {
@@ -762,28 +800,57 @@
             } else if (tab === 'drivers') {
                 document.getElementById('driversTab').classList.add('active');
                 loadDrivers();
+            } else if (tab === 'admins') {
+                document.getElementById('adminsTab').classList.add('active');
+                loadAdmins();
             }
         }
 
         // Login
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('loginError');
 
-            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                localStorage.setItem('adminAuth', 'true');
-                showDashboard();
-            } else {
-                errorDiv.textContent = '❌ Sai tên đăng nhập hoặc mật khẩu!';
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminAuth', 'true');
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+                    // Show admin tab if superadmin
+                    if (currentUser.role === 'superadmin') {
+                        document.getElementById('adminsTabBtn').style.display = 'block';
+                    }
+
+                    showDashboard();
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.message || 'Sai tên đăng nhập hoặc mật khẩu!');
+                    errorDiv.classList.add('show');
+                }
+            } catch (error) {
+                errorDiv.textContent = '❌ Lỗi kết nối server!';
                 errorDiv.classList.add('show');
+                console.error('Login error:', error);
             }
         });
 
         // Logout
         function logout() {
             localStorage.removeItem('adminAuth');
+            localStorage.removeItem('adminToken');
+            authToken = null;
             location.reload();
         }
 
@@ -796,24 +863,7 @@
             setInterval(loadOrders, 10000);
         }
 
-        // Check if we need to reset daily data
-        function checkDailyReset() {
-            const today = new Date().toDateString();
-            const lastResetDate = localStorage.getItem('lastResetDate');
-
-            if (lastResetDate !== today) {
-                // Lưu dữ liệu cũ vào Google Sheets
-                const oldOrders = localStorage.getItem('orders');
-                if (oldOrders) {
-                    saveToGoogleSheets(JSON.parse(oldOrders), lastResetDate);
-                }
-
-                // Reset dữ liệu
-                localStorage.setItem('orders', JSON.stringify([]));
-                localStorage.setItem('lastResetDate', today);
-                orders = [];
-            }
-        }
+        // Daily reset is now handled by backend API
 
         // Save old data to Google Sheets
         function saveToGoogleSheets(oldOrders, date) {
@@ -854,20 +904,28 @@
             }).catch(err => console.error('Lỗi lưu Google Sheets:', err));
         }
 
-        // Load orders (sẽ fetch từ API sau)
-        function loadOrders() {
-            // Kiểm tra reset hàng ngày
-            checkDailyReset();
+        // Load orders from API
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_BASE}/api/orders`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
 
-            // TODO: Fetch from API
-            // Tạm thời dùng localStorage để demo
-            const savedOrders = localStorage.getItem('orders');
-            if (savedOrders) {
-                orders = JSON.parse(savedOrders);
+                if (data.success) {
+                    orders = data.orders;
+                    updateStats();
+                    renderOrders();
+                } else {
+                    console.error('Load orders failed:', data.message);
+                }
+            } catch (error) {
+                console.error('Load orders error:', error);
+                // Fallback to empty if API fails
+                orders = [];
+                updateStats();
+                renderOrders();
             }
-
-            updateStats();
-            renderOrders();
         }
 
         // Toggle stats panel
@@ -1051,19 +1109,28 @@
         }
 
         // Mark payment as received
-        function markPaymentReceived(orderId) {
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex !== -1) {
-                orders[orderIndex].paymentReceived = true;
-                localStorage.setItem('orders', JSON.stringify(orders));
-                updateStats();
-                renderOrders();
-            }
-        }
+        async function markPaymentReceived(orderId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ paymentReceived: true })
+                });
 
-        // Initialize last reset date if not set
-        if (!localStorage.getItem('lastResetDate')) {
-            localStorage.setItem('lastResetDate', new Date().toDateString());
+                const data = await response.json();
+
+                if (data.success) {
+                    loadOrders(); // Reload to update UI
+                } else {
+                    alert('❌ ' + (data.message || 'Cập nhật thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Mark payment error:', error);
+            }
         }
 
         // Check auth on load
@@ -1071,13 +1138,24 @@
             showDashboard();
         }
 
-        // Load drivers
-        function loadDrivers() {
-            const savedDrivers = localStorage.getItem('drivers');
-            if (savedDrivers) {
-                drivers = JSON.parse(savedDrivers);
+        // Load drivers from API
+        async function loadDrivers() {
+            try {
+                const response = await fetch(`${API_BASE}/api/drivers`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    drivers = data.drivers;
+                    renderDrivers();
+                } else {
+                    console.error('Load drivers failed:', data.message);
+                }
+            } catch (error) {
+                console.error('Load drivers error:', error);
+                showNotification('Lỗi kết nối API, vui lòng thử lại', 'error');
             }
-            renderDrivers();
         }
 
         // Render drivers list
@@ -1145,44 +1223,88 @@
         }
 
         // Approve driver
-        function approveDriver(phone) {
-            const driverIndex = drivers.findIndex(d => d.phone === phone);
-            if (driverIndex !== -1) {
-                drivers[driverIndex].status = 'active';
-                localStorage.setItem('drivers', JSON.stringify(drivers));
-                renderDrivers();
-                alert('✅ Đã xác nhận tài xế!');
+        async function approveDriver(phone) {
+            try {
+                const response = await fetch(`${API_BASE}/api/drivers/${phone}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Đã xác nhận tài xế!');
+                    loadDrivers();
+                } else {
+                    alert('❌ ' + (data.message || 'Xác nhận thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Approve driver error:', error);
             }
         }
 
         // Deactivate driver
-        function deactivateDriver(phone) {
-            if (confirm('Bạn có chắc muốn vô hiệu hóa tài xế này?')) {
-                const driverIndex = drivers.findIndex(d => d.phone === phone);
-                if (driverIndex !== -1) {
-                    drivers[driverIndex].status = 'inactive';
-                    localStorage.setItem('drivers', JSON.stringify(drivers));
-                    renderDrivers();
+        async function deactivateDriver(phone) {
+            if (!confirm('Bạn có chắc muốn vô hiệu hóa tài xế này?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/drivers/${phone}/deactivate`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    loadDrivers();
+                } else {
+                    alert('❌ ' + (data.message || 'Vô hiệu hóa thất bại!'));
                 }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Deactivate driver error:', error);
             }
         }
 
         // Activate driver
-        function activateDriver(phone) {
-            const driverIndex = drivers.findIndex(d => d.phone === phone);
-            if (driverIndex !== -1) {
-                drivers[driverIndex].status = 'active';
-                localStorage.setItem('drivers', JSON.stringify(drivers));
-                renderDrivers();
+        async function activateDriver(phone) {
+            try {
+                const response = await fetch(`${API_BASE}/api/drivers/${phone}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    loadDrivers();
+                } else {
+                    alert('❌ ' + (data.message || 'Kích hoạt thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Activate driver error:', error);
             }
         }
 
         // Delete driver
-        function deleteDriver(phone) {
-            if (confirm('Bạn có chắc muốn xóa tài xế này?')) {
-                drivers = drivers.filter(d => d.phone !== phone);
-                localStorage.setItem('drivers', JSON.stringify(drivers));
-                renderDrivers();
+        async function deleteDriver(phone) {
+            if (!confirm('Bạn có chắc muốn xóa tài xế này?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/drivers/${phone}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Đã xóa tài xế!');
+                    loadDrivers();
+                } else {
+                    alert('❌ ' + (data.message || 'Xóa thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Delete driver error:', error);
             }
         }
 
@@ -1197,7 +1319,7 @@
         }
 
         // Submit manual order
-        document.getElementById('manualOrderForm').addEventListener('submit', (e) => {
+        document.getElementById('manualOrderForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const phone = document.getElementById('manualPhone').value;
@@ -1205,46 +1327,29 @@
             const dropoff = document.getElementById('manualDropoff').value;
             const note = document.getElementById('manualNote').value;
 
-            // Generate order ID
-            function generateOrderId() {
-                let orderCounter = parseInt(localStorage.getItem('orderCounter') || '0');
-                orderCounter++;
-                localStorage.setItem('orderCounter', orderCounter.toString());
-                if (orderCounter < 1000) {
-                    return 'LXH-368' + orderCounter.toString().padStart(3, '0');
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/manual`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ phone, pickup, dropoff, note })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`✅ Đã tạo đơn thủ công #${data.data.id}\nĐơn đã được bắn cho tài xế!`);
+                    closeManualOrderModal();
+                    loadOrders(); // Reload orders from API
                 } else {
-                    return 'LXH-368' + orderCounter.toString();
+                    alert('❌ ' + (data.message || 'Tạo đơn thất bại!'));
                 }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Create manual order error:', error);
             }
-
-            const order = {
-                id: generateOrderId(),
-                phone,
-                pickup: pickup || 'Chưa có thông tin',
-                dropoff: dropoff || 'Chưa có thông tin',
-                distance: 'Chưa xác định',
-                price: null, // Tài xế sẽ điền
-                note: note || '',
-                status: 'new',
-                isManual: true, // Đánh dấu đơn thủ công
-                driverName: null,
-                driverPhone: null,
-                paymentReceived: false,
-                createdAt: new Date().toISOString()
-            };
-
-            // Lưu vào localStorage
-            orders.push(order);
-            localStorage.setItem('orders', JSON.stringify(orders));
-
-            // Cập nhật UI
-            updateStats();
-            renderOrders();
-
-            // Đóng modal
-            closeManualOrderModal();
-
-            alert(`✅ Đã tạo đơn thủ công #${order.id}\nĐơn đã được bắn cho tài xế!`);
         });
 
         // Close modal khi click outside
@@ -1253,6 +1358,128 @@
                 closeManualOrderModal();
             }
         });
+
+        // ============= ADMIN MANAGEMENT =============
+
+        // Load admins
+        async function loadAdmins() {
+            if (!authToken || currentUser?.role !== 'superadmin') return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admins`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    admins = data.admins;
+                    renderAdmins();
+                }
+            } catch (error) {
+                console.error('Load admins error:', error);
+            }
+        }
+
+        // Render admins list
+        function renderAdmins() {
+            const list = document.getElementById('adminsList');
+            if (!admins.length) {
+                list.innerHTML = '<p style="color: #999; text-align: center;">Chưa có quản trị viên nào</p>';
+                return;
+            }
+
+            list.innerHTML = admins.map(admin => `
+                <div class="driver-card">
+                    <div class="driver-info">
+                        <div class="driver-name">${admin.username}</div>
+                        <div class="driver-phone">
+                            ${admin.role === 'superadmin' ? '👑 Super Admin' :
+                              admin.role === 'admin' ? '🔑 Admin' : '👀 Moderator'}
+                        </div>
+                        <div style="font-size: 12px; color: #999; margin-top: 4px;">
+                            Tạo bởi: ${admin.createdBy} | ${new Date(admin.createdAt).toLocaleDateString('vi-VN')}
+                        </div>
+                    </div>
+                    ${admin.role !== 'superadmin' ? `
+                        <button class="delete-btn" onclick="deleteAdmin('${admin.id}', '${admin.username}')">🗑️</button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Open add admin modal
+        function openAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'flex';
+            document.getElementById('addAdminError').style.display = 'none';
+        }
+
+        // Close add admin modal
+        function closeAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'none';
+            document.getElementById('addAdminForm').reset();
+        }
+
+        // Add admin form submit
+        document.getElementById('addAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('newAdminUsername').value;
+            const password = document.getElementById('newAdminPassword').value;
+            const role = document.getElementById('newAdminRole').value;
+            const errorDiv = document.getElementById('addAdminError');
+
+            errorDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admins`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ username, password, role })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Đã tạo tài khoản quản trị viên thành công!');
+                    closeAddAdminModal();
+                    loadAdmins();
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.message || 'Tạo tài khoản thất bại!');
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = '❌ Lỗi kết nối server!';
+                errorDiv.style.display = 'block';
+                console.error('Add admin error:', error);
+            }
+        });
+
+        // Delete admin
+        async function deleteAdmin(adminId, username) {
+            if (!confirm(`Xác nhận xóa quản trị viên "${username}"?`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admins/${adminId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Đã xóa quản trị viên thành công!');
+                    loadAdmins();
+                } else {
+                    alert('❌ ' + (data.message || 'Xóa thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Delete admin error:', error);
+            }
+        }
 
         // Listen for new orders (will use Firebase later)
         window.addEventListener('storage', (e) => {
@@ -1263,6 +1490,15 @@
                 loadDrivers();
             }
         });
+
+        // Check if user is logged in on page load
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            if (currentUser.role === 'superadmin') {
+                document.getElementById('adminsTabBtn').style.display = 'block';
+            }
+        }
     </script>
 </body>
 </html>

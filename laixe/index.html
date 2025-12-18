@@ -564,6 +564,10 @@
     </div>
 
     <script>
+        // Secure API Configuration
+        const API_BASE = 'https://server-g1bxkeen8-hubogos-projects.vercel.app';
+        let authToken = localStorage.getItem('driverToken');
+
         let currentDriver = null;
         let currentTab = 'new';
         let orders = [];
@@ -610,37 +614,32 @@
                 return;
             }
 
-            // Check if phone already exists
-            const drivers = JSON.parse(localStorage.getItem('drivers') || '[]');
-            if (drivers.find(d => d.phone === phone)) {
-                errorDiv.textContent = '❌ Số điện thoại đã được đăng ký!';
+            // Register via API
+            fetch(`${API_BASE}/api/auth/driver/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    successDiv.textContent = '✅ Đăng ký thành công! Vui lòng chờ admin xác nhận.';
+                    successDiv.style.display = 'block';
+                    document.getElementById('registerForm').reset();
+                    setTimeout(() => {
+                        showLoginForm();
+                        successDiv.style.display = 'none';
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.message || 'Đăng ký thất bại!');
+                    errorDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = '❌ Lỗi kết nối server!';
                 errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Register new driver
-            const newDriver = {
-                name,
-                phone,
-                password,
-                status: 'pending', // pending, active, inactive
-                createdAt: new Date().toISOString()
-            };
-
-            drivers.push(newDriver);
-            localStorage.setItem('drivers', JSON.stringify(drivers));
-
-            successDiv.textContent = '✅ Đăng ký thành công! Vui lòng chờ admin xác nhận.';
-            successDiv.style.display = 'block';
-
-            // Clear form
-            document.getElementById('registerForm').reset();
-
-            // Switch to login form after 2s
-            setTimeout(() => {
-                showLoginForm();
-                successDiv.style.display = 'none';
-            }, 2000);
+                console.error('Register error:', error);
+            });
         });
 
         // Login
@@ -652,38 +651,37 @@
 
             errorDiv.style.display = 'none';
 
-            // Check credentials
-            const drivers = JSON.parse(localStorage.getItem('drivers') || '[]');
-            const driver = drivers.find(d => d.phone === phone && d.password === password);
-
-            if (!driver) {
-                errorDiv.textContent = '❌ Số điện thoại hoặc mật khẩu không đúng!';
+            // Login via API
+            fetch(`${API_BASE}/api/auth/driver/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    authToken = data.token;
+                    currentDriver = data.user;
+                    localStorage.setItem('driverToken', data.token);
+                    localStorage.setItem('driverAuth', JSON.stringify(data.user));
+                    showApp();
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.message || 'Đăng nhập thất bại!');
+                    errorDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = '❌ Lỗi kết nối server!';
                 errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (driver.status === 'pending') {
-                errorDiv.textContent = '⏳ Tài khoản của bạn đang chờ admin xác minh. Vui lòng thử lại sau.';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (driver.status === 'inactive') {
-                errorDiv.textContent = '❌ Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ admin.';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Login successful
-            currentDriver = { name: driver.name, phone: driver.phone };
-            localStorage.setItem('driverAuth', JSON.stringify(currentDriver));
-
-            showApp();
+                console.error('Login error:', error);
+            });
         });
 
         // Logout
         function logout() {
             localStorage.removeItem('driverAuth');
+            localStorage.removeItem('driverToken');
+            authToken = null;
             location.reload();
         }
 
@@ -736,45 +734,36 @@
 
             loadOrders();
 
-            // Refresh every 3s to check for new orders
-            setInterval(() => {
-                const savedOrders = localStorage.getItem('orders');
-                if (savedOrders) {
-                    const newOrders = JSON.parse(savedOrders);
+            // Refresh every 5s to check for new orders from API
+            setInterval(async () => {
+                const oldNewOrdersCount = orders.filter(o => o.status === 'new').length;
 
-                    // Kiểm tra xem có đơn mới không
-                    const oldNewOrdersCount = orders.filter(o => o.status === 'new').length;
-                    const newOrdersCount = newOrders.filter(o => o.status === 'new').length;
+                await loadOrders(); // Reload from API
 
-                    // Cập nhật orders và render lại nếu có thay đổi
-                    if (JSON.stringify(newOrders) !== JSON.stringify(orders)) {
-                        orders = newOrders;
-                        renderOrders();
+                const newOrdersCount = orders.filter(o => o.status === 'new').length;
 
-                        // Thông báo có đơn mới
-                        if (newOrdersCount > oldNewOrdersCount) {
-                            const newOrdersAdded = newOrdersCount - oldNewOrdersCount;
+                // Thông báo có đơn mới
+                if (newOrdersCount > oldNewOrdersCount) {
+                    const newOrdersAdded = newOrdersCount - oldNewOrdersCount;
 
-                            // Show notification
-                            showNotification('🔔 Có đơn mới!', {
-                                body: `Có ${newOrdersAdded} đơn mới vừa được đặt`,
-                                icon: '../favicon.ico',
-                                badge: '../favicon.ico',
-                                tag: 'new-order', // Gộp các notification cùng loại
-                                renotify: true, // Rung lại ngay cả khi notification cũ còn
-                                vibrate: [200, 100, 200, 100, 200], // Rung mạnh hơn
-                                requireInteraction: true
-                            });
+                    // Show notification
+                    showNotification('🔔 Có đơn mới!', {
+                        body: `Có ${newOrdersAdded} đơn mới vừa được đặt`,
+                        icon: '../favicon.ico',
+                        badge: '../favicon.ico',
+                        tag: 'new-order',
+                        renotify: true,
+                        vibrate: [200, 100, 200, 100, 200],
+                        requireInteraction: true
+                    });
 
-                            // Play notification sound (nếu browser hỗ trợ)
-                            try {
-                                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE');
-                                audio.play().catch(() => {});
-                            } catch(e) {}
-                        }
-                    }
+                    // Play notification sound
+                    try {
+                        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE');
+                        audio.play().catch(() => {});
+                    } catch(e) {}
                 }
-            }, 3000); // Refresh every 3s
+            }, 5000); // Refresh every 3s
         }
 
         // Switch tab
@@ -786,12 +775,23 @@
         }
 
         // Load orders
-        function loadOrders() {
-            const savedOrders = localStorage.getItem('orders');
-            if (savedOrders) {
-                orders = JSON.parse(savedOrders);
+        // Load orders from API
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_BASE}/api/orders`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    orders = data.orders;
+                    renderOrders();
+                } else {
+                    console.error('Load orders failed:', data.message);
+                }
+            } catch (error) {
+                console.error('Load orders error:', error);
             }
-            renderOrders();
         }
 
         // Render orders
@@ -1158,34 +1158,64 @@
         }
 
         // Accept order
-        function acceptOrder(orderId) {
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex !== -1) {
-                orders[orderIndex].status = 'accepted';
-                orders[orderIndex].driverName = currentDriver.name;
-                orders[orderIndex].driverPhone = currentDriver.phone;
-                localStorage.setItem('orders', JSON.stringify(orders));
-                renderOrders();
+        async function acceptOrder(orderId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}/accept`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        driverName: currentDriver.name,
+                        driverPhone: currentDriver.phone
+                    })
+                });
 
-                // Show notification
-                alert(`✅ Đã nhận đơn #${orderId}!\n\nHãy liên hệ khách: ${orders[orderIndex].phone}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const order = data.order;
+                    alert(`✅ Đã nhận đơn #${orderId}!\n\nHãy liên hệ khách: ${order.phone}`);
+                    loadOrders();
+                } else {
+                    alert('❌ ' + (data.message || 'Nhận đơn thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Accept order error:', error);
             }
         }
 
         // Reject order
-        function rejectOrder(orderId) {
-            if (confirm('Bạn chắc chắn muốn từ chối đơn này?')) {
-                const orderIndex = orders.findIndex(o => o.id === orderId);
-                if (orderIndex !== -1) {
-                    orders[orderIndex].status = 'rejected';
-                    localStorage.setItem('orders', JSON.stringify(orders));
-                    renderOrders();
+        async function rejectOrder(orderId) {
+            if (!confirm('Bạn chắc chắn muốn từ chối đơn này?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ status: 'rejected' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadOrders();
+                } else {
+                    alert('❌ ' + (data.message || 'Từ chối đơn thất bại!'));
                 }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Reject order error:', error);
             }
         }
 
         // Save price for manual order
-        function savePrice(orderId) {
+        async function savePrice(orderId) {
             const input = document.getElementById(`price-${orderId}`);
             const price = input.value.trim();
 
@@ -1200,22 +1230,34 @@
                 return;
             }
 
-            // Update order price
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex !== -1) {
-                orders[orderIndex].price = numPrice.toLocaleString('vi-VN') + 'đ';
-                localStorage.setItem('orders', JSON.stringify(orders));
-                renderOrders();
-                alert('✅ Đã lưu giá tiền!');
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}/price`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ price: numPrice.toLocaleString('vi-VN') + 'đ' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Đã lưu giá tiền!');
+                    loadOrders();
+                } else {
+                    alert('❌ ' + (data.message || 'Lưu giá thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Save price error:', error);
             }
         }
 
         // Complete order
-        function completeOrder(orderId) {
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex === -1) return;
-
-            const order = orders[orderIndex];
+        async function completeOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
 
             // Nếu là đơn thủ công và chưa có giá, yêu cầu nhập giá trước
             if (order.isManual && !order.price) {
@@ -1223,12 +1265,25 @@
                 return;
             }
 
-            if (confirm('Xác nhận đã hoàn thành đơn này?')) {
-                orders[orderIndex].status = 'completed';
-                localStorage.setItem('orders', JSON.stringify(orders));
-                renderOrders();
+            if (!confirm('Xác nhận đã hoàn thành đơn này?')) return;
 
-                alert('✅ Đã hoàn thành đơn! Chúc bạn một ngày tốt lành!');
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}/complete`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Đã hoàn thành đơn! Chúc bạn một ngày tốt lành!');
+                    loadOrders();
+                } else {
+                    alert('❌ ' + (data.message || 'Hoàn thành đơn thất bại!'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi kết nối server!');
+                console.error('Complete order error:', error);
             }
         }
 

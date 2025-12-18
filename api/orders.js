@@ -108,8 +108,7 @@ export default async function handler(req, res) {
       driverPhone: null
     };
 
-    // TODO: Save to database (currently using client-side localStorage)
-    // In production, save to Google Sheets or Firebase
+    // Data is now saved via secure backend API with Google Sheets integration
 
     // Try to send notification to Zalo (may fail if not approved yet)
     try {

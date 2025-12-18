@@ -1480,8 +1480,8 @@
         // CẤU HÌNH - THAY ĐỔI THÔNG TIN TẠI ĐÂY
         // =============================================
         const CONFIG = {
-            // Webhook URL để nhận đơn hàng (production: https://laixehohatinh.com/api/orders)
-            WEBHOOK_URL: 'https://laixehohatinh.com/api/orders',
+            // API URL để tạo đơn hàng
+            WEBHOOK_URL: 'https://server-g1bxkeen8-hubogos-projects.vercel.app/api/orders',
             
             // Số hotline
             HOTLINE: '0777.13.13.55',
@@ -2099,21 +2099,11 @@
             submitBtn.disabled = true;
             btnText.innerHTML = '<span class="spinner"></span>Đang xử lý...';
 
-            // Tạo order data với mã đơn tuần tự
+            // Tạo order data với mã đơn tuần tự (backend sẽ tự tạo)
             function generateOrderId() {
-                // Lấy số thứ tự hiện tại từ localStorage
-                let orderCounter = parseInt(localStorage.getItem('orderCounter') || '0');
-                orderCounter++; // Tăng lên 1
-
-                // Lưu lại
-                localStorage.setItem('orderCounter', orderCounter.toString());
-
-                // Format: #LXH-368XXX (với XXX là 001-999) hoặc #LXH-368XXXX (từ 1000 trở đi)
-                if (orderCounter < 1000) {
-                    return 'LXH-368' + orderCounter.toString().padStart(3, '0');
-                } else {
-                    return 'LXH-368' + orderCounter.toString();
-                }
+                // Format: #LXH-368XXX với timestamp để unique
+                const timestamp = Date.now().toString().slice(-6);
+                return 'LXH-368' + timestamp;
             }
 
             const orderId = generateOrderId();
@@ -2138,35 +2128,31 @@
                 status: 'pending'
             };
 
-            // Lưu đơn hàng vào localStorage (để admin và driver xem)
-            const order = {
-                id: orderId,
-                pickup: orderData.pickup.address,
-                dropoff: orderData.dropoff ? orderData.dropoff.address : '',
-                phone: orderData.customer.phone,
-                price: orderData.price.toLocaleString('vi-VN') + 'đ',
-                distance: orderData.distance.toFixed(1) + ' km',
-                status: 'new',
-                createdAt: new Date().toISOString(),
-                driverName: null,
-                driverPhone: null
-            };
-
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.unshift(order); // Thêm vào đầu mảng
-            localStorage.setItem('orders', JSON.stringify(orders));
-
+            // Gửi đơn hàng lên API backend
             try {
-                // Gửi đến webhook/server
                 const response = await fetch(CONFIG.WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(orderData)
+                    body: JSON.stringify({
+                        phone: orderData.customer.phone,
+                        pickup: orderData.pickup.address,
+                        dropoff: orderData.dropoff ? orderData.dropoff.address : '',
+                        distance: orderData.distance.toFixed(1) + ' km',
+                        price: orderData.price.toLocaleString('vi-VN') + 'đ',
+                        pickupCoords: orderData.pickup.location,
+                        dropoffCoords: orderData.dropoff ? orderData.dropoff.location : null
+                    })
                 });
 
-                console.log('Order sent to server:', orderData);
+                const result = await response.json();
+
+                if (!result.success) {
+                    console.error('Order creation failed:', result.message);
+                }
+
+                console.log('Order sent to server:', result);
 
             } catch (error) {
                 console.error('Error sending order:', error);
