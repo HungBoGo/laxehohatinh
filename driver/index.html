@@ -16,15 +16,17 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: #f5f5f5;
+            background: #f5f7fa;
             padding-bottom: 80px;
+            min-height: 100vh;
+            margin: 0;
         }
 
         .header {
-            background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+            background: #FF6B35;
             color: white;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -32,12 +34,14 @@
 
         .header h1 {
             font-size: 20px;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            font-weight: 600;
         }
 
         .header .driver-name {
-            opacity: 0.9;
             font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
         }
 
         .logout-btn {
@@ -45,29 +49,29 @@
             color: #FF6B35;
             border: none;
             padding: 8px 16px;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             margin-top: 10px;
+            font-size: 14px;
         }
 
         /* Statistics Section */
         .stats-section {
             background: white;
-            margin: 15px;
+            margin: 16px;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .stats-title {
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
         }
 
         .stat-row {
@@ -75,7 +79,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f5f5f5;
         }
 
         .stat-row:last-child {
@@ -85,16 +89,17 @@
         .stat-label {
             color: #666;
             font-size: 14px;
+            font-weight: 400;
         }
 
         .stat-value {
-            font-weight: bold;
+            font-weight: 600;
             font-size: 16px;
             color: #333;
         }
 
         .stat-value.total {
-            color: #2ECC71;
+            color: #2c3e50;
             font-size: 18px;
         }
 
@@ -103,23 +108,18 @@
         }
 
         .stat-value.net {
-            color: #FF6B35;
+            color: #2ECC71;
             font-size: 18px;
         }
 
         /* History Section */
         .history-section {
             background: white;
-            margin: 15px;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .history-section:active {
-            transform: scale(0.98);
         }
 
         .history-header {
@@ -160,9 +160,9 @@
 
         .login-box {
             background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 400px;
         }
@@ -170,13 +170,16 @@
         .login-box h2 {
             text-align: center;
             color: #FF6B35;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 24px;
+            font-weight: 600;
         }
 
         .login-box p {
             text-align: center;
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
+            font-weight: 400;
         }
 
         .form-group {
@@ -225,20 +228,63 @@
 
         .order-card {
             background: white;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #FF6B35;
         }
 
         .order-card.new {
-            border-left: 5px solid #FFC107;
-            animation: pulse 2s infinite;
+            border-left-color: #FFC107;
         }
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            50% { box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3); }
+        .order-card.completed-compact {
+            background: #f5f5f5;
+            padding: 12px 16px;
+            border-left-color: #999;
+        }
+
+        .order-card.completed-compact .order-header {
+            margin-bottom: 8px;
+        }
+
+        .order-card.completed-compact .order-price {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .order-card.completed-compact .order-badge {
+            background: #999;
+            color: white;
+        }
+
+        .map-btn, .call-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .call-btn {
+            background: #2196F3;
+        }
+
+        .order-detail {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .order-detail > div {
+            flex: 1;
         }
 
         .order-header {
@@ -263,6 +309,70 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
+        }
+
+        .order-badge.manual {
+            background: #9C27B0;
+            color: white;
+        }
+
+        .order-note {
+            background: #E3F2FD;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #1976D2;
+            border-left: 3px solid #2196F3;
+        }
+
+        .order-note strong {
+            color: #0D47A1;
+        }
+
+        .price-input-wrapper {
+            background: #FFF8E1;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .price-input-wrapper label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .price-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .price-input-group input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 2px solid #FFC107;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .price-input-group button {
+            padding: 10px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .price-input-group button:active {
+            background: #388E3C;
         }
 
         .order-detail {
@@ -297,35 +407,39 @@
 
         .btn-accept {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             background: #4CAF50;
             color: white;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
         }
 
         .btn-reject {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             background: #f44336;
             color: white;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
         }
 
         .btn-complete {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: #2196F3;
             color: white;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+            cursor: pointer;
         }
 
         .empty-state {
@@ -357,22 +471,24 @@
             bottom: 0;
             left: 0;
             right: 0;
+            border-top: 1px solid #e0e0e0;
         }
 
         .tab {
             flex: 1;
-            padding: 15px;
+            padding: 16px;
             text-align: center;
             border: none;
             background: white;
             cursor: pointer;
-            color: #666;
+            color: #999;
             font-weight: 500;
+            font-size: 14px;
         }
 
         .tab.active {
             color: #FF6B35;
-            border-top: 3px solid #FF6B35;
+            border-bottom: 3px solid #FF6B35;
         }
     </style>
 </head>
@@ -382,16 +498,47 @@
         <div class="login-box">
             <h2>🚗 App Tài Xế</h2>
             <p>LaiXeHoHaTinh.com</p>
-            <form id="loginForm">
+
+            <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                <button type="button" class="btn" style="flex: 1; background: #FF6B35;" id="showLoginBtn" onclick="showLoginForm()">Đăng nhập</button>
+                <button type="button" class="btn" style="flex: 1; background: #2ECC71;" id="showRegisterBtn" onclick="showRegisterForm()">Đăng ký</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" style="display: none;">
+                <div class="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="tel" id="loginPhone" required placeholder="VD: 0123456789">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="loginPassword" required placeholder="Nhập mật khẩu">
+                </div>
+                <button type="submit" class="btn">Đăng nhập</button>
+                <div id="loginError" style="color: #DC3545; margin-top: 10px; display: none;"></div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" style="display: none;">
                 <div class="form-group">
                     <label>Tên của bạn</label>
-                    <input type="text" id="driverName" required placeholder="VD: Nguyễn Văn A">
+                    <input type="text" id="registerName" required placeholder="VD: Nguyễn Văn A">
                 </div>
                 <div class="form-group">
                     <label>Số điện thoại</label>
-                    <input type="tel" id="driverPhone" required placeholder="VD: 0123456789">
+                    <input type="tel" id="registerPhone" required placeholder="VD: 0123456789">
                 </div>
-                <button type="submit" class="btn">Đăng nhập</button>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="registerPassword" required placeholder="Tạo mật khẩu">
+                </div>
+                <div class="form-group">
+                    <label>Xác nhận mật khẩu</label>
+                    <input type="password" id="registerPasswordConfirm" required placeholder="Nhập lại mật khẩu">
+                </div>
+                <button type="submit" class="btn" style="background: #2ECC71;">Đăng ký</button>
+                <div id="registerError" style="color: #DC3545; margin-top: 10px; display: none;"></div>
+                <div id="registerSuccess" style="color: #2ECC71; margin-top: 10px; display: none;"></div>
             </form>
         </div>
     </div>
@@ -421,13 +568,114 @@
         let currentTab = 'new';
         let orders = [];
 
+        // Show login form
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('showLoginBtn').style.background = '#FF6B35';
+            document.getElementById('showRegisterBtn').style.background = '#ccc';
+        }
+
+        // Show register form
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('showLoginBtn').style.background = '#ccc';
+            document.getElementById('showRegisterBtn').style.background = '#2ECC71';
+        }
+
+        // Register
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const phone = document.getElementById('registerPhone').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            const errorDiv = document.getElementById('registerError');
+            const successDiv = document.getElementById('registerSuccess');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            // Validate
+            if (password !== passwordConfirm) {
+                errorDiv.textContent = '❌ Mật khẩu xác nhận không khớp!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = '❌ Mật khẩu phải có ít nhất 6 ký tự!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Check if phone already exists
+            const drivers = JSON.parse(localStorage.getItem('drivers') || '[]');
+            if (drivers.find(d => d.phone === phone)) {
+                errorDiv.textContent = '❌ Số điện thoại đã được đăng ký!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Register new driver
+            const newDriver = {
+                name,
+                phone,
+                password,
+                status: 'pending', // pending, active, inactive
+                createdAt: new Date().toISOString()
+            };
+
+            drivers.push(newDriver);
+            localStorage.setItem('drivers', JSON.stringify(drivers));
+
+            successDiv.textContent = '✅ Đăng ký thành công! Vui lòng chờ admin xác nhận.';
+            successDiv.style.display = 'block';
+
+            // Clear form
+            document.getElementById('registerForm').reset();
+
+            // Switch to login form after 2s
+            setTimeout(() => {
+                showLoginForm();
+                successDiv.style.display = 'none';
+            }, 2000);
+        });
+
         // Login
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const name = document.getElementById('driverName').value;
-            const phone = document.getElementById('driverPhone').value;
+            const phone = document.getElementById('loginPhone').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
 
-            currentDriver = { name, phone };
+            errorDiv.style.display = 'none';
+
+            // Check credentials
+            const drivers = JSON.parse(localStorage.getItem('drivers') || '[]');
+            const driver = drivers.find(d => d.phone === phone && d.password === password);
+
+            if (!driver) {
+                errorDiv.textContent = '❌ Số điện thoại hoặc mật khẩu không đúng!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (driver.status === 'pending') {
+                errorDiv.textContent = '⏳ Tài khoản của bạn đang chờ admin xác minh. Vui lòng thử lại sau.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (driver.status === 'inactive') {
+                errorDiv.textContent = '❌ Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ admin.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Login successful
+            currentDriver = { name: driver.name, phone: driver.phone };
             localStorage.setItem('driverAuth', JSON.stringify(currentDriver));
 
             showApp();
@@ -439,11 +687,52 @@
             location.reload();
         }
 
+        // Request notification permission
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                console.log('Browser không hỗ trợ notification');
+                return false;
+            }
+
+            if (Notification.permission === 'granted') {
+                return true;
+            }
+
+            if (Notification.permission !== 'denied') {
+                const permission = await Notification.requestPermission();
+                return permission === 'granted';
+            }
+
+            return false;
+        }
+
+        // Show notification
+        function showNotification(title, options) {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification(title, {
+                    ...options,
+                    vibrate: [200, 100, 200], // Rung điện thoại
+                    requireInteraction: true // Notification không tự tắt
+                });
+
+                // Click vào notification → focus vào app
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+
+                return notification;
+            }
+        }
+
         // Show app
         function showApp() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appScreen').style.display = 'block';
             document.getElementById('headerDriverName').textContent = `👤 ${currentDriver.name}`;
+
+            // Request notification permission
+            requestNotificationPermission();
 
             loadOrders();
 
@@ -464,22 +753,28 @@
 
                         // Thông báo có đơn mới
                         if (newOrdersCount > oldNewOrdersCount) {
-                            // Có đơn mới
-                            if ('Notification' in window && Notification.permission === 'granted') {
-                                new Notification('🔔 Đơn mới!', {
-                                    body: 'Có đơn mới vừa được đặt',
-                                    icon: '../favicon.ico'
-                                });
-                            }
+                            const newOrdersAdded = newOrdersCount - oldNewOrdersCount;
+
+                            // Show notification
+                            showNotification('🔔 Có đơn mới!', {
+                                body: `Có ${newOrdersAdded} đơn mới vừa được đặt`,
+                                icon: '../favicon.ico',
+                                badge: '../favicon.ico',
+                                tag: 'new-order', // Gộp các notification cùng loại
+                                renotify: true, // Rung lại ngay cả khi notification cũ còn
+                                vibrate: [200, 100, 200, 100, 200], // Rung mạnh hơn
+                                requireInteraction: true
+                            });
+
+                            // Play notification sound (nếu browser hỗ trợ)
+                            try {
+                                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE');
+                                audio.play().catch(() => {});
+                            } catch(e) {}
                         }
                     }
                 }
             }, 3000); // Refresh every 3s
-
-            // Request notification permission
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
         }
 
         // Switch tab
@@ -598,6 +893,21 @@
                     const badgeText = order.status === 'new' ? '🔔 Đơn mới' :
                                      order.status === 'accepted' ? '✅ Đã nhận' : '✓ Hoàn thành';
 
+                    // Đơn hoàn thành: Thu gọn
+                    if (order.status === 'completed') {
+                        return `
+                            <div class="order-card completed-compact">
+                                <div class="order-header">
+                                    <span class="order-id">#${order.id}</span>
+                                    <span class="order-badge completed">✓ Hoàn thành</span>
+                                </div>
+                                <div class="order-price">
+                                    💰 ${order.price}
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     let actions = '';
                     if (order.status === 'new') {
                         actions = `
@@ -618,19 +928,67 @@
                         `;
                     }
 
+                    // Hiển thị note cho đơn thủ công
+                    const noteHTML = (order.isManual && order.note) ? `
+                        <div class="order-note">
+                            <strong>📝 Ghi chú:</strong> ${order.note}
+                        </div>
+                    ` : '';
+
+                    // Hiển thị giá hoặc input field cho đơn thủ công đã nhận
+                    let priceHTML = '';
+                    if (order.price) {
+                        // Đã có giá
+                        priceHTML = `<div class="order-price">💰 ${order.price}</div>`;
+                    } else if (order.isManual && order.status === 'accepted') {
+                        // Đơn thủ công đã nhận: cho phép nhập giá
+                        priceHTML = `
+                            <div class="price-input-wrapper">
+                                <label>💰 Nhập số tiền thực nhận:</label>
+                                <div class="price-input-group">
+                                    <input type="number"
+                                           id="price-${order.id}"
+                                           placeholder="VD: 150000"
+                                           min="0"
+                                           step="1000">
+                                    <button onclick="savePrice('${order.id}')">💾 Lưu</button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Chưa có giá, chưa nhận
+                        const priceText = order.isManual ?
+                            '💰 Chưa xác định (Nhập sau khi nhận đơn)' :
+                            '💰 Đang tính...';
+                        priceHTML = `<div class="order-price">${priceText}</div>`;
+                    }
+
                     return `
                         <div class="order-card ${statusClass} ${order.status}">
                             <div class="order-header">
                                 <span class="order-id">#${order.id}</span>
-                                <span class="order-badge">${badgeText}</span>
+                                <div style="display: flex; gap: 6px;">
+                                    ${order.isManual ? '<span class="order-badge manual">📞 Hotline</span>' : ''}
+                                    <span class="order-badge">${badgeText}</span>
+                                </div>
                             </div>
+
+                            ${noteHTML}
 
                             <div class="order-detail">
                                 <span class="order-detail-icon">📍</span>
-                                <div>
+                                <div style="flex: 1;">
                                     <strong>Điểm đón</strong><br>
                                     ${order.pickup}
                                 </div>
+                                ${order.status === 'accepted' ? `
+                                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.pickup)}"
+                                       target="_blank"
+                                       class="map-btn"
+                                       title="Mở bản đồ">
+                                        🗺️
+                                    </a>
+                                ` : ''}
                             </div>
 
                             ${order.dropoff ? `
@@ -645,12 +1003,17 @@
 
                             <div class="order-detail">
                                 <span class="order-detail-icon">📱</span>
-                                <div>
+                                <div style="flex: 1;">
                                     <strong>SĐT khách</strong><br>
-                                    <a href="tel:${order.phone}" style="color: #FF6B35; text-decoration: none;">
-                                        ${order.phone}
-                                    </a>
+                                    <span style="color: #FF6B35;">${order.phone}</span>
                                 </div>
+                                ${order.status === 'accepted' ? `
+                                    <a href="tel:${order.phone}"
+                                       class="call-btn"
+                                       title="Gọi điện">
+                                        📞
+                                    </a>
+                                ` : ''}
                             </div>
 
                             <div class="order-detail">
@@ -658,9 +1021,7 @@
                                 <div>${order.distance}</div>
                             </div>
 
-                            <div class="order-price">
-                                💰 ${order.price}
-                            </div>
+                            ${priceHTML}
 
                             ${actions}
                         </div>
@@ -705,12 +1066,52 @@
                     `;
                 }
 
+                // Hiển thị note cho đơn thủ công
+                const noteHTML = (order.isManual && order.note) ? `
+                    <div class="order-note">
+                        <strong>📝 Ghi chú:</strong> ${order.note}
+                    </div>
+                ` : '';
+
+                // Hiển thị giá hoặc input field cho đơn thủ công đã nhận
+                let priceHTML = '';
+                if (order.price) {
+                    // Đã có giá
+                    priceHTML = `<div class="order-price">💰 ${order.price}</div>`;
+                } else if (order.isManual && order.status === 'accepted') {
+                    // Đơn thủ công đã nhận: cho phép nhập giá
+                    priceHTML = `
+                        <div class="price-input-wrapper">
+                            <label>💰 Nhập số tiền thực nhận:</label>
+                            <div class="price-input-group">
+                                <input type="number"
+                                       id="price-${order.id}"
+                                       placeholder="VD: 150000"
+                                       min="0"
+                                       step="1000">
+                                <button onclick="savePrice('${order.id}')">💾 Lưu</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Chưa có giá, chưa nhận
+                    const priceText = order.isManual ?
+                        '💰 Chưa xác định (Nhập sau khi nhận đơn)' :
+                        '💰 Đang tính...';
+                    priceHTML = `<div class="order-price">${priceText}</div>`;
+                }
+
                 return `
                     <div class="order-card ${statusClass} ${order.status}">
                         <div class="order-header">
                             <span class="order-id">#${order.id}</span>
-                            <span class="order-badge">${badgeText}</span>
+                            <div style="display: flex; gap: 6px;">
+                                ${order.isManual ? '<span class="order-badge manual">📞 Hotline</span>' : ''}
+                                <span class="order-badge">${badgeText}</span>
+                            </div>
                         </div>
+
+                        ${noteHTML}
 
                         <div class="order-detail">
                             <span class="order-detail-icon">📍</span>
@@ -734,9 +1135,12 @@
                             <span class="order-detail-icon">📱</span>
                             <div>
                                 <strong>SĐT khách</strong><br>
-                                <a href="tel:${order.phone}" style="color: #FF6B35; text-decoration: none;">
-                                    ${order.phone}
-                                </a>
+                                ${currentTab === 'new' ?
+                                    '<span style="color: #999;">****</span>' :
+                                    `<a href="tel:${order.phone}" style="color: #FF6B35; text-decoration: none;">
+                                        ${order.phone}
+                                    </a>`
+                                }
                             </div>
                         </div>
 
@@ -745,9 +1149,7 @@
                             <div>${order.distance}</div>
                         </div>
 
-                        <div class="order-price">
-                            💰 ${order.price}
-                        </div>
+                        ${priceHTML}
 
                         ${actions}
                     </div>
@@ -782,22 +1184,57 @@
             }
         }
 
+        // Save price for manual order
+        function savePrice(orderId) {
+            const input = document.getElementById(`price-${orderId}`);
+            const price = input.value.trim();
+
+            if (!price) {
+                alert('❌ Vui lòng nhập số tiền!');
+                return;
+            }
+
+            const numPrice = parseInt(price);
+            if (isNaN(numPrice) || numPrice <= 0) {
+                alert('❌ Giá tiền không hợp lệ!');
+                return;
+            }
+
+            // Update order price
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+                orders[orderIndex].price = numPrice.toLocaleString('vi-VN') + 'đ';
+                localStorage.setItem('orders', JSON.stringify(orders));
+                renderOrders();
+                alert('✅ Đã lưu giá tiền!');
+            }
+        }
+
         // Complete order
         function completeOrder(orderId) {
-            if (confirm('Xác nhận đã hoàn thành đơn này?')) {
-                const orderIndex = orders.findIndex(o => o.id === orderId);
-                if (orderIndex !== -1) {
-                    orders[orderIndex].status = 'completed';
-                    localStorage.setItem('orders', JSON.stringify(orders));
-                    renderOrders();
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex === -1) return;
 
-                    alert('✅ Đã hoàn thành đơn! Chúc bạn một ngày tốt lành!');
-                }
+            const order = orders[orderIndex];
+
+            // Nếu là đơn thủ công và chưa có giá, yêu cầu nhập giá trước
+            if (order.isManual && !order.price) {
+                alert('❌ Vui lòng nhập số tiền thực nhận trước khi hoàn thành đơn!');
+                return;
+            }
+
+            if (confirm('Xác nhận đã hoàn thành đơn này?')) {
+                orders[orderIndex].status = 'completed';
+                localStorage.setItem('orders', JSON.stringify(orders));
+                renderOrders();
+
+                alert('✅ Đã hoàn thành đơn! Chúc bạn một ngày tốt lành!');
             }
         }
 
         // Helper functions
         function parsePrice(priceStr) {
+            if (!priceStr) return 0;
             return parseInt(priceStr.replace(/[^\d]/g, '')) || 0;
         }
 

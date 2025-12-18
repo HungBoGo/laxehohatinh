@@ -1363,11 +1363,11 @@
                         <span class="price-value" id="distanceValue">-- km</span>
                     </div>
                     <div class="price-row">
-                        <span class="price-label">3km đầu</span>
+                        <span class="price-label">4km đầu</span>
                         <span class="price-value" id="first3kmPrice">--</span>
                     </div>
                     <div class="price-row">
-                        <span class="price-label">Km thêm (<span id="extraKm">0</span> km × 15.000đ)</span>
+                        <span class="price-label">Km thêm (<span id="extraKm">0</span> km × 12.000đ)</span>
                         <span class="price-value" id="extraKmPrice">--</span>
                     </div>
                     <div class="price-row total">
@@ -1486,11 +1486,11 @@
             // Số hotline
             HOTLINE: '0777.13.13.55',
             
-            // Giá 3km đầu (VNĐ) - Tối thiểu
-            FIRST_3KM_PRICE: 80000,
+            // Giá 4km đầu (VNĐ) - Tối thiểu
+            FIRST_4KM_PRICE: 100000,
 
-            // Giá mỗi km từ km thứ 4 trở đi (VNĐ)
-            PRICE_PER_KM_AFTER_3: 15000,
+            // Giá mỗi km từ km thứ 5 trở đi (VNĐ)
+            PRICE_PER_KM_AFTER_4: 12000,
             
             // Tọa độ trung tâm Hà Tĩnh
             CENTER_LAT: 18.3559,
@@ -1931,17 +1931,17 @@
             let extraPart = 0;
             let extraDistance = 0;
 
-            if (distance <= 3) {
-                // Dưới 3km: chỉ tính giá cố định 70k
-                price = CONFIG.FIRST_3KM_PRICE;
-                firstPart = CONFIG.FIRST_3KM_PRICE;
+            if (distance <= 4) {
+                // Dưới 4km: chỉ tính giá cố định 100k
+                price = CONFIG.FIRST_4KM_PRICE;
+                firstPart = CONFIG.FIRST_4KM_PRICE;
                 extraPart = 0;
                 extraDistance = 0;
             } else {
-                // Trên 3km: 70k cho 3km đầu + 15k/km cho phần còn lại
-                firstPart = CONFIG.FIRST_3KM_PRICE;
-                extraDistance = Math.round((distance - 3) * 10) / 10;
-                extraPart = Math.ceil(extraDistance * CONFIG.PRICE_PER_KM_AFTER_3 / 1000) * 1000;
+                // Trên 4km: 100k cho 4km đầu + 12k/km cho phần còn lại
+                firstPart = CONFIG.FIRST_4KM_PRICE;
+                extraDistance = Math.round((distance - 4) * 10) / 10;
+                extraPart = Math.ceil(extraDistance * CONFIG.PRICE_PER_KM_AFTER_4 / 1000) * 1000;
                 price = firstPart + extraPart;
             }
 
@@ -2099,8 +2099,24 @@
             submitBtn.disabled = true;
             btnText.innerHTML = '<span class="spinner"></span>Đang xử lý...';
 
-            // Tạo order data
-            const orderId = 'LXH-' + Date.now().toString().slice(-6);
+            // Tạo order data với mã đơn tuần tự
+            function generateOrderId() {
+                // Lấy số thứ tự hiện tại từ localStorage
+                let orderCounter = parseInt(localStorage.getItem('orderCounter') || '0');
+                orderCounter++; // Tăng lên 1
+
+                // Lưu lại
+                localStorage.setItem('orderCounter', orderCounter.toString());
+
+                // Format: #LXH-368XXX (với XXX là 001-999) hoặc #LXH-368XXXX (từ 1000 trở đi)
+                if (orderCounter < 1000) {
+                    return 'LXH-368' + orderCounter.toString().padStart(3, '0');
+                } else {
+                    return 'LXH-368' + orderCounter.toString();
+                }
+            }
+
+            const orderId = generateOrderId();
             const orderData = {
                 orderId: orderId,
                 timestamp: new Date().toISOString(),

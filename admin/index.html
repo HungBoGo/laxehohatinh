@@ -14,49 +14,118 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: #f5f5f5;
+            background: #f5f7fa;
+            min-height: 100vh;
         }
 
         .header {
-            background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+            background: #FF6B35;
             color: white;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+            font-size: 20px;
+            margin-bottom: 6px;
+            font-weight: 600;
         }
 
         .header p {
-            opacity: 0.9;
             font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .stats-container {
+            background: white;
+            margin: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .stats-header {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            user-select: none;
+        }
+
+        .stats-header:active {
+            background: #eeeff0;
+        }
+
+        .stats-compact {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            flex: 1;
+        }
+
+        .stats-compact-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stats-compact-item .label {
+            color: #666;
+            font-size: 9px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .stats-compact-item .value {
+            font-weight: 700;
+            color: #FF6B35;
+            font-size: 13px;
+        }
+
+        .toggle-icon {
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-icon.expanded {
+            transform: rotate(180deg);
         }
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 16px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .stats.expanded {
+            max-height: 600px;
         }
 
         .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
         }
 
         .stat-card h3 {
-            font-size: 14px;
+            font-size: 11px;
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
         }
 
         .stat-card .number {
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 700;
             color: #FF6B35;
         }
 
@@ -66,10 +135,10 @@
 
         .order-card {
             background: white;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border-left: 4px solid #FF6B35;
         }
 
@@ -109,21 +178,17 @@
 
         .payment-btn {
             margin-top: 10px;
-            padding: 8px 16px;
+            padding: 10px 16px;
             border: none;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 14px;
         }
 
         .payment-btn.pending {
             background: #FFC107;
             color: #333;
-        }
-
-        .payment-btn.pending:hover {
-            background: #FFB300;
         }
 
         .payment-btn.received {
@@ -268,6 +333,261 @@
             margin-bottom: 20px;
             opacity: 0.3;
         }
+
+        .order-card.paid-compact {
+            background: #f5f5f5;
+            cursor: pointer;
+            border-left-color: #999;
+        }
+
+        .order-details-compact {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .order-full-details {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #ddd;
+        }
+
+        .call-btn-inline {
+            display: inline-block;
+            margin-left: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .call-btn-inline:hover {
+            transform: scale(1.2);
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 0;
+            margin: 16px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: white;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #FF6B35;
+            background: #FFF5F2;
+            border-bottom-color: #FF6B35;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .drivers-section {
+            padding: 20px;
+        }
+
+        .driver-card {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498DB;
+        }
+
+        .driver-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .driver-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .driver-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .status-pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .driver-details {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .driver-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .action-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn.danger {
+            background: #DC3545;
+            color: white;
+        }
+
+        .action-btn.success {
+            background: #2ECC71;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .manual-order-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .manual-order-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.6);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            line-height: 28px;
+        }
+
+        .close-btn:hover {
+            color: #FF6B35;
+        }
+
+        .form-group-inline {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .submit-order-btn {
+            width: 100%;
+            padding: 14px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        .submit-order-btn:hover {
+            background: #E55A2B;
+        }
     </style>
 </head>
 <body>
@@ -302,43 +622,118 @@
             </div>
         </div>
 
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Đơn hàng mới</h3>
-                <div class="number" id="newOrders">0</div>
+        <div class="stats-container">
+            <div class="stats-header" onclick="toggleStats()">
+                <div class="stats-compact">
+                    <div class="stats-compact-item">
+                        <div class="label">Đơn mới</div>
+                        <div class="value" id="newOrdersCompact">0</div>
+                    </div>
+                    <div class="stats-compact-item">
+                        <div class="label">Đang thực hiện</div>
+                        <div class="value" id="activeOrdersCompact">0</div>
+                    </div>
+                    <div class="stats-compact-item">
+                        <div class="label">Hoàn thành</div>
+                        <div class="value" id="completedOrdersCompact">0</div>
+                    </div>
+                    <div class="stats-compact-item">
+                        <div class="label">Tổng đơn</div>
+                        <div class="value" id="totalOrdersCompact">0</div>
+                    </div>
+                    <div class="stats-compact-item">
+                        <div class="label">Thu nhập App</div>
+                        <div class="value" id="appRevenueCompact" style="color: #2ECC71;">0đ</div>
+                    </div>
+                    <div class="stats-compact-item">
+                        <div class="label">Tổng doanh thu</div>
+                        <div class="value" id="totalRevenueCompact" style="color: #FF6B35;">0đ</div>
+                    </div>
+                </div>
+                <div class="toggle-icon" id="toggleIcon">▼</div>
             </div>
-            <div class="stat-card">
-                <h3>Đang thực hiện</h3>
-                <div class="number" id="activeOrders">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Hoàn thành</h3>
-                <div class="number" id="completedOrders">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Tổng đơn</h3>
-                <div class="number" id="totalOrders">0</div>
+
+            <div class="stats" id="statsDetail">
+                <div class="stat-card">
+                    <h3>Đơn hàng mới</h3>
+                    <div class="number" id="newOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Đang thực hiện</h3>
+                    <div class="number" id="activeOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Hoàn thành</h3>
+                    <div class="number" id="completedOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Tổng đơn</h3>
+                    <div class="number" id="totalOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>💰 Tổng doanh thu</h3>
+                    <div class="number" id="totalRevenue" style="color: #2ECC71;">0đ</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📱 Thu nhập App (20%)</h3>
+                    <div class="number" id="appRevenue" style="color: #FF6B35;">0đ</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🚗 Đã trả tài xế (80%)</h3>
+                    <div class="number" id="driverRevenue" style="color: #3498DB;">0đ</div>
+                </div>
             </div>
         </div>
 
-        <div class="stats">
-            <div class="stat-card">
-                <h3>💰 Tổng doanh thu</h3>
-                <div class="number" id="totalRevenue" style="color: #2ECC71;">0đ</div>
-            </div>
-            <div class="stat-card">
-                <h3>📱 Thu nhập App (20%)</h3>
-                <div class="number" id="appRevenue" style="color: #FF6B35;">0đ</div>
-            </div>
-            <div class="stat-card">
-                <h3>🚗 Đã trả tài xế (80%)</h3>
-                <div class="number" id="driverRevenue" style="color: #3498DB;">0đ</div>
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('orders')">📋 Đơn hàng</button>
+            <button class="tab-btn" onclick="switchTab('drivers')">👥 Tài xế</button>
+        </div>
+
+        <div id="ordersTab" class="tab-content active">
+            <div class="orders">
+                <h2 style="margin-bottom: 20px; color: #333;">📋 Danh sách đơn hàng</h2>
+                <div id="ordersList"></div>
             </div>
         </div>
 
-        <div class="orders">
-            <h2 style="margin-bottom: 20px; color: #333;">📋 Danh sách đơn hàng</h2>
-            <div id="ordersList"></div>
+        <div id="driversTab" class="tab-content">
+            <div class="drivers-section">
+                <h2 style="margin-bottom: 20px; color: #333;">👥 Quản lý tài xế</h2>
+                <div id="driversList"></div>
+            </div>
+        </div>
+
+        <!-- Manual Order Button -->
+        <button class="manual-order-btn" onclick="openManualOrderModal()">+</button>
+
+        <!-- Manual Order Modal -->
+        <div id="manualOrderModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>📞 Tạo đơn thủ công</h2>
+                    <button class="close-btn" onclick="closeManualOrderModal()">&times;</button>
+                </div>
+                <form id="manualOrderForm">
+                    <div class="form-group">
+                        <label>Số điện thoại khách hàng *</label>
+                        <input type="tel" id="manualPhone" required placeholder="VD: 0123456789">
+                    </div>
+                    <div class="form-group">
+                        <label>Điểm đón</label>
+                        <input type="text" id="manualPickup" placeholder="VD: 123 Hà Tĩnh (không bắt buộc)">
+                    </div>
+                    <div class="form-group">
+                        <label>Điểm đến</label>
+                        <input type="text" id="manualDropoff" placeholder="VD: 456 Vinh (không bắt buộc)">
+                    </div>
+                    <div class="form-group">
+                        <label>Ghi chú</label>
+                        <textarea id="manualNote" rows="3" placeholder="Ghi chú cho tài xế (nếu có)" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+                    </div>
+                    <button type="submit" class="submit-order-btn">📤 Bắn đơn cho tài xế</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -351,6 +746,24 @@
 
         // Mock orders data (sẽ thay bằng API sau)
         let orders = [];
+        let drivers = [];
+
+        // Switch tabs
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tab === 'orders') {
+                document.getElementById('ordersTab').classList.add('active');
+            } else if (tab === 'drivers') {
+                document.getElementById('driversTab').classList.add('active');
+                loadDrivers();
+            }
+        }
 
         // Login
         document.getElementById('loginForm').addEventListener('submit', (e) => {
@@ -383,8 +796,69 @@
             setInterval(loadOrders, 10000);
         }
 
+        // Check if we need to reset daily data
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const lastResetDate = localStorage.getItem('lastResetDate');
+
+            if (lastResetDate !== today) {
+                // Lưu dữ liệu cũ vào Google Sheets
+                const oldOrders = localStorage.getItem('orders');
+                if (oldOrders) {
+                    saveToGoogleSheets(JSON.parse(oldOrders), lastResetDate);
+                }
+
+                // Reset dữ liệu
+                localStorage.setItem('orders', JSON.stringify([]));
+                localStorage.setItem('lastResetDate', today);
+                orders = [];
+            }
+        }
+
+        // Save old data to Google Sheets
+        function saveToGoogleSheets(oldOrders, date) {
+            // Google Sheets API endpoint (cần config)
+            const SHEETS_URL = 'YOUR_GOOGLE_SHEETS_WEB_APP_URL'; // TODO: Thay bằng URL thực
+
+            if (SHEETS_URL === 'YOUR_GOOGLE_SHEETS_WEB_APP_URL') {
+                console.log('Google Sheets chưa được cấu hình');
+                console.log('Dữ liệu cần lưu:', { date, orders: oldOrders });
+                return;
+            }
+
+            // Tính toán thống kê ngày
+            const stats = {
+                date: date,
+                totalOrders: oldOrders.length,
+                newOrders: oldOrders.filter(o => o.status === 'new').length,
+                completedOrders: oldOrders.filter(o => o.status === 'completed').length,
+                totalRevenue: oldOrders.filter(o => o.status === 'completed' && o.price).reduce((sum, order) => {
+                    return sum + (parseInt(order.price.replace(/[^\d]/g, '')) || 0);
+                }, 0),
+                appRevenue: oldOrders.filter(o => o.status === 'completed' && o.paymentReceived && o.price).reduce((sum, order) => {
+                    return sum + Math.round((parseInt(order.price.replace(/[^\d]/g, '')) || 0) * 0.2);
+                }, 0)
+            };
+
+            // Gửi dữ liệu lên Google Sheets
+            fetch(SHEETS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    stats: stats,
+                    orders: oldOrders
+                })
+            }).catch(err => console.error('Lỗi lưu Google Sheets:', err));
+        }
+
         // Load orders (sẽ fetch từ API sau)
         function loadOrders() {
+            // Kiểm tra reset hàng ngày
+            checkDailyReset();
+
             // TODO: Fetch from API
             // Tạm thời dùng localStorage để demo
             const savedOrders = localStorage.getItem('orders');
@@ -396,26 +870,42 @@
             renderOrders();
         }
 
+        // Toggle stats panel
+        function toggleStats() {
+            const statsDetail = document.getElementById('statsDetail');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            statsDetail.classList.toggle('expanded');
+            toggleIcon.classList.toggle('expanded');
+        }
+
         // Update statistics
         function updateStats() {
             const newCount = orders.filter(o => o.status === 'new').length;
             const activeCount = orders.filter(o => o.status === 'accepted').length;
             const completedCount = orders.filter(o => o.status === 'completed').length;
 
+            // Update detailed stats
             document.getElementById('newOrders').textContent = newCount;
             document.getElementById('activeOrders').textContent = activeCount;
             document.getElementById('completedOrders').textContent = completedCount;
             document.getElementById('totalOrders').textContent = orders.length;
 
+            // Update compact stats
+            document.getElementById('newOrdersCompact').textContent = newCount;
+            document.getElementById('activeOrdersCompact').textContent = activeCount;
+            document.getElementById('completedOrdersCompact').textContent = completedCount;
+            document.getElementById('totalOrdersCompact').textContent = orders.length;
+
             // Tính toán doanh thu từ đơn hoàn thành
-            const completedOrders = orders.filter(o => o.status === 'completed');
+            const completedOrders = orders.filter(o => o.status === 'completed' && o.price);
             const totalRevenue = completedOrders.reduce((sum, order) => {
                 const price = parseInt(order.price.replace(/[^\d]/g, '')) || 0;
                 return sum + price;
             }, 0);
 
             // Chỉ tính thu nhập app từ những đơn đã nhận tiền
-            const paidOrders = orders.filter(o => o.status === 'completed' && o.paymentReceived === true);
+            const paidOrders = orders.filter(o => o.status === 'completed' && o.paymentReceived === true && o.price);
             const paidRevenue = paidOrders.reduce((sum, order) => {
                 const price = parseInt(order.price.replace(/[^\d]/g, '')) || 0;
                 return sum + price;
@@ -424,9 +914,14 @@
             const appFee = Math.round(paidRevenue * 0.2); // 20% cho app (chỉ từ đơn đã nhận tiền)
             const driverPayout = totalRevenue - Math.round(totalRevenue * 0.2); // 80% tổng cho tài xế
 
+            // Update detailed revenue
             document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('vi-VN') + 'đ';
             document.getElementById('appRevenue').textContent = appFee.toLocaleString('vi-VN') + 'đ';
             document.getElementById('driverRevenue').textContent = driverPayout.toLocaleString('vi-VN') + 'đ';
+
+            // Update compact revenue
+            document.getElementById('totalRevenueCompact').textContent = totalRevenue.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('appRevenueCompact').textContent = appFee.toLocaleString('vi-VN') + 'đ';
         }
 
         // Render orders list
@@ -463,15 +958,54 @@
 
                 // Nút nhận tiền chỉ hiện với đơn hoàn thành
                 let paymentButton = '';
-                if (order.status === 'completed') {
+                if (order.status === 'completed' && order.price) {
                     const price = parseInt(order.price.replace(/[^\d]/g, '')) || 0;
                     const appFee = Math.round(price * 0.2);
 
                     if (order.paymentReceived) {
-                        paymentButton = `<button class="payment-btn received" disabled>Đã nhận ${appFee.toLocaleString('vi-VN')}đ</button>`;
+                        paymentButton = `<button class="payment-btn received" disabled>✓ Đã nhận ${appFee.toLocaleString('vi-VN')}đ</button>`;
                     } else {
                         paymentButton = `<button class="payment-btn pending" onclick="markPaymentReceived('${order.id}')">💵 Nhận ${appFee.toLocaleString('vi-VN')}đ từ tài xế</button>`;
                     }
+                }
+
+                // Đơn đã nhận tiền: Thu gọn
+                if (order.paymentReceived && order.price) {
+                    return `
+                        <div class="order-card paid-compact" onclick="toggleOrderDetails('${order.id}')">
+                            <div class="order-header">
+                                <span class="order-id">#${order.id}</span>
+                                <span class="order-status received">✓ Đã nhận tiền</span>
+                            </div>
+                            <div class="order-details-compact">
+                                <span>💰 ${order.price}</span>
+                                <span style="color: #2ECC71; font-weight: 600;">
+                                    +${Math.round(parseInt(order.price.replace(/[^\d]/g, '')) * 0.2).toLocaleString('vi-VN')}đ
+                                </span>
+                            </div>
+                            <div class="order-full-details" id="details-${order.id}" style="display: none;">
+                                <div class="order-details">
+                                    📍 <strong>Điểm đón:</strong> ${order.pickup}
+                                </div>
+                                ${order.dropoff ? `
+                                <div class="order-details">
+                                    🎯 <strong>Điểm đến:</strong> ${order.dropoff}
+                                </div>
+                                ` : ''}
+                                <div class="order-details">
+                                    📱 <strong>SĐT:</strong> ${order.phone}
+                                    <a href="tel:${order.phone}" class="call-btn-inline" title="Gọi điện">📞</a>
+                                </div>
+                                <div class="order-details">
+                                    📏 <strong>Khoảng cách:</strong> ${order.distance}
+                                </div>
+                                <div class="order-details" style="color: #999; margin-top: 10px;">
+                                    🕐 ${new Date(order.createdAt).toLocaleString('vi-VN')}
+                                </div>
+                                ${driverInfo}
+                            </div>
+                        </div>
+                    `;
                 }
 
                 return `
@@ -490,6 +1024,7 @@
                         ` : ''}
                         <div class="order-details">
                             📱 <strong>SĐT:</strong> ${order.phone}
+                            <a href="tel:${order.phone}" class="call-btn-inline" title="Gọi điện">📞</a>
                         </div>
                         <div class="order-details">
                             💰 <strong>Giá:</strong> ${order.price}
@@ -507,6 +1042,14 @@
             }).join('');
         }
 
+        // Toggle order details
+        function toggleOrderDetails(orderId) {
+            const details = document.getElementById(`details-${orderId}`);
+            if (details) {
+                details.style.display = details.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
         // Mark payment as received
         function markPaymentReceived(orderId) {
             const orderIndex = orders.findIndex(o => o.id === orderId);
@@ -518,15 +1061,206 @@
             }
         }
 
+        // Initialize last reset date if not set
+        if (!localStorage.getItem('lastResetDate')) {
+            localStorage.setItem('lastResetDate', new Date().toDateString());
+        }
+
         // Check auth on load
         if (localStorage.getItem('adminAuth') === 'true') {
             showDashboard();
         }
 
+        // Load drivers
+        function loadDrivers() {
+            const savedDrivers = localStorage.getItem('drivers');
+            if (savedDrivers) {
+                drivers = JSON.parse(savedDrivers);
+            }
+            renderDrivers();
+        }
+
+        // Render drivers list
+        function renderDrivers() {
+            const container = document.getElementById('driversList');
+
+            if (drivers.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <h3>Chưa có tài xế nào</h3>
+                        <p>Tài xế đăng ký sẽ hiện ở đây</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = drivers.map(driver => {
+                let statusClass, statusText, actionButtons;
+
+                if (driver.status === 'pending') {
+                    statusClass = 'status-pending';
+                    statusText = '⏳ Chờ xác minh';
+                    actionButtons = `
+                        <button class="action-btn success" onclick="approveDriver('${driver.phone}')">✓ Xác nhận</button>
+                        <button class="action-btn danger" onclick="deleteDriver('${driver.phone}')">❌ Từ chối</button>
+                    `;
+                } else if (driver.status === 'active') {
+                    statusClass = 'status-active';
+                    statusText = '✓ Đang hoạt động';
+                    actionButtons = `
+                        <button class="action-btn danger" onclick="deactivateDriver('${driver.phone}')">❌ Vô hiệu hóa</button>
+                        <button class="action-btn danger" onclick="deleteDriver('${driver.phone}')">🗑️ Xóa</button>
+                    `;
+                } else { // inactive
+                    statusClass = 'status-inactive';
+                    statusText = '❌ Ngưng hoạt động';
+                    actionButtons = `
+                        <button class="action-btn success" onclick="activateDriver('${driver.phone}')">✓ Kích hoạt</button>
+                        <button class="action-btn danger" onclick="deleteDriver('${driver.phone}')">🗑️ Xóa</button>
+                    `;
+                }
+
+                return `
+                    <div class="driver-card">
+                        <div class="driver-header">
+                            <span class="driver-name">👤 ${driver.name}</span>
+                            <span class="driver-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="driver-details">
+                            📱 <strong>SĐT:</strong> ${driver.phone}
+                            <a href="tel:${driver.phone}" class="call-btn-inline" title="Gọi điện">📞</a>
+                        </div>
+                        <div class="driver-details" style="color: #999;">
+                            🕐 Đăng ký: ${new Date(driver.createdAt).toLocaleString('vi-VN')}
+                        </div>
+                        <div class="driver-actions">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Approve driver
+        function approveDriver(phone) {
+            const driverIndex = drivers.findIndex(d => d.phone === phone);
+            if (driverIndex !== -1) {
+                drivers[driverIndex].status = 'active';
+                localStorage.setItem('drivers', JSON.stringify(drivers));
+                renderDrivers();
+                alert('✅ Đã xác nhận tài xế!');
+            }
+        }
+
+        // Deactivate driver
+        function deactivateDriver(phone) {
+            if (confirm('Bạn có chắc muốn vô hiệu hóa tài xế này?')) {
+                const driverIndex = drivers.findIndex(d => d.phone === phone);
+                if (driverIndex !== -1) {
+                    drivers[driverIndex].status = 'inactive';
+                    localStorage.setItem('drivers', JSON.stringify(drivers));
+                    renderDrivers();
+                }
+            }
+        }
+
+        // Activate driver
+        function activateDriver(phone) {
+            const driverIndex = drivers.findIndex(d => d.phone === phone);
+            if (driverIndex !== -1) {
+                drivers[driverIndex].status = 'active';
+                localStorage.setItem('drivers', JSON.stringify(drivers));
+                renderDrivers();
+            }
+        }
+
+        // Delete driver
+        function deleteDriver(phone) {
+            if (confirm('Bạn có chắc muốn xóa tài xế này?')) {
+                drivers = drivers.filter(d => d.phone !== phone);
+                localStorage.setItem('drivers', JSON.stringify(drivers));
+                renderDrivers();
+            }
+        }
+
+        // Manual Order Modal
+        function openManualOrderModal() {
+            document.getElementById('manualOrderModal').classList.add('show');
+        }
+
+        function closeManualOrderModal() {
+            document.getElementById('manualOrderModal').classList.remove('show');
+            document.getElementById('manualOrderForm').reset();
+        }
+
+        // Submit manual order
+        document.getElementById('manualOrderForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const phone = document.getElementById('manualPhone').value;
+            const pickup = document.getElementById('manualPickup').value;
+            const dropoff = document.getElementById('manualDropoff').value;
+            const note = document.getElementById('manualNote').value;
+
+            // Generate order ID
+            function generateOrderId() {
+                let orderCounter = parseInt(localStorage.getItem('orderCounter') || '0');
+                orderCounter++;
+                localStorage.setItem('orderCounter', orderCounter.toString());
+                if (orderCounter < 1000) {
+                    return 'LXH-368' + orderCounter.toString().padStart(3, '0');
+                } else {
+                    return 'LXH-368' + orderCounter.toString();
+                }
+            }
+
+            const order = {
+                id: generateOrderId(),
+                phone,
+                pickup: pickup || 'Chưa có thông tin',
+                dropoff: dropoff || 'Chưa có thông tin',
+                distance: 'Chưa xác định',
+                price: null, // Tài xế sẽ điền
+                note: note || '',
+                status: 'new',
+                isManual: true, // Đánh dấu đơn thủ công
+                driverName: null,
+                driverPhone: null,
+                paymentReceived: false,
+                createdAt: new Date().toISOString()
+            };
+
+            // Lưu vào localStorage
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            // Cập nhật UI
+            updateStats();
+            renderOrders();
+
+            // Đóng modal
+            closeManualOrderModal();
+
+            alert(`✅ Đã tạo đơn thủ công #${order.id}\nĐơn đã được bắn cho tài xế!`);
+        });
+
+        // Close modal khi click outside
+        document.getElementById('manualOrderModal').addEventListener('click', (e) => {
+            if (e.target.id === 'manualOrderModal') {
+                closeManualOrderModal();
+            }
+        });
+
         // Listen for new orders (will use Firebase later)
         window.addEventListener('storage', (e) => {
             if (e.key === 'orders') {
                 loadOrders();
+            }
+            if (e.key === 'drivers') {
+                loadDrivers();
             }
         });
     </script>
