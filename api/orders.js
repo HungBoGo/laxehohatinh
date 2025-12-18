@@ -97,15 +97,31 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Send notification to Zalo
-    const zaloResult = await sendZaloNotification(orderData);
+    // Generate order ID
+    const orderId = 'ORD' + Date.now();
+    const order = {
+      id: orderId,
+      ...orderData,
+      status: 'new',
+      createdAt: new Date().toISOString(),
+      driverName: null,
+      driverPhone: null
+    };
 
-    // TODO: Save to Google Sheets (implement later)
+    // TODO: Save to database (currently using client-side localStorage)
+    // In production, save to Google Sheets or Firebase
+
+    // Try to send notification to Zalo (may fail if not approved yet)
+    try {
+      await sendZaloNotification(orderData);
+    } catch (error) {
+      console.log('Zalo notification failed (expected if OA not approved):', error.message);
+    }
 
     res.status(200).json({
       success: true,
-      message: 'Order received and sent to Zalo',
-      zaloResult
+      message: 'Order received',
+      order: order
     });
 
   } catch (error) {

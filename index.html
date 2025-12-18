@@ -2105,6 +2105,24 @@
                 status: 'pending'
             };
 
+            // Lưu đơn hàng vào localStorage (để admin và driver xem)
+            const order = {
+                id: orderId,
+                pickup: orderData.pickup,
+                dropoff: orderData.dropoff,
+                phone: orderData.phone,
+                price: formatPrice(orderData.price),
+                distance: orderData.distance.toFixed(1) + ' km',
+                status: 'new',
+                createdAt: new Date().toISOString(),
+                driverName: null,
+                driverPhone: null
+            };
+
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.unshift(order); // Thêm vào đầu mảng
+            localStorage.setItem('orders', JSON.stringify(orders));
+
             try {
                 // Gửi đến webhook/server
                 const response = await fetch(CONFIG.WEBHOOK_URL, {
@@ -2115,18 +2133,14 @@
                     body: JSON.stringify(orderData)
                 });
 
-                // Hiện modal thành công (dù webhook có lỗi cũng hiện để demo)
-                showSuccessModal(orderId);
-                
-                // Log order (để debug)
-                console.log('Order sent:', orderData);
-                
+                console.log('Order sent to server:', orderData);
+
             } catch (error) {
                 console.error('Error sending order:', error);
-                // Vẫn hiện modal thành công để demo
-                showSuccessModal(orderId);
-                console.log('Order data (webhook failed):', orderData);
             }
+
+            // Hiện modal thành công
+            showSuccessModal(orderId);
 
             // Reset button
             submitBtn.disabled = false;

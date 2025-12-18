@@ -1,0 +1,17 @@
+{
+  "name": "Lái Xe Hộ Hà Tĩnh - Tài Xế",
+  "short_name": "LXHHT Tài Xế",
+  "description": "App dành cho tài xế lái xe hộ",
+  "start_url": "/driver/",
+  "display": "standalone",
+  "background_color": "#FF6B35",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "../favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
