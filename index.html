@@ -729,12 +729,30 @@
 
             /* Drag handle */
             .panel-handle {
-                width: 40px;
-                height: 4px;
-                background: #DDD;
-                border-radius: 2px;
-                margin: 0 auto 12px;
-                cursor: pointer;
+                width: 60px;
+                height: 5px;
+                background: #CCC;
+                border-radius: 3px;
+                margin: 0 auto 16px;
+                cursor: grab;
+                position: relative;
+                transition: all 0.2s ease;
+            }
+
+            .panel-handle::before {
+                content: '';
+                position: absolute;
+                top: -12px;
+                left: -10px;
+                right: -10px;
+                bottom: -12px;
+                /* Tăng vùng touch */
+            }
+
+            .panel-handle:active {
+                cursor: grabbing;
+                background: #AAA;
+                transform: scaleX(1.1);
             }
 
             #bookingForm {
@@ -2387,8 +2405,12 @@
                 return;
             }
 
+            // Đóng modal NGAY LẬP TỨC
+            gpsConfirmModal.classList.remove('show');
+
             // Hiện loading
             gpsLoading.classList.add('show');
+            showToast('🔍 Đang lấy vị trí của bạn...');
 
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
@@ -2400,15 +2422,15 @@
                         );
                         const data = await response.json();
 
+                        // Tắt loading
+                        gpsLoading.classList.remove('show');
+
                         const pickupInput = document.getElementById('pickupInput');
                         pickupInput.value = data.results && data.results.length > 0 ? data.results[0].formatted_address : `${latitude}, ${longitude}`;
                         pickupInput.dataset.lat = latitude;
                         pickupInput.dataset.lng = longitude;
 
                         setMarker('pickup', latitude, longitude);
-
-                        // Đóng modal
-                        gpsConfirmModal.classList.remove('show');
 
                         showToast('✅ Đã đặt điểm đón tại vị trí hiện tại!');
 
@@ -2433,52 +2455,27 @@
                     gpsLoading.classList.remove('show');
 
                     if (error.code === 1) {
-                        showToast('❌ Vui lòng cho phép truy cập vị trí');
+                        showToast('❌ Vui lòng cho phép truy cập vị trí trong cài đặt trình duyệt');
+                    } else if (error.code === 2) {
+                        showToast('❌ Không thể lấy vị trí GPS. Vui lòng bật GPS trên điện thoại');
+                    } else if (error.code === 3) {
+                        showToast('❌ Lấy vị trí quá lâu. Vui lòng thử lại');
                     } else {
                         showToast('❌ Không thể lấy vị trí GPS');
                     }
-
-                    setTimeout(() => {
-                        declineGPS();
-                    }, 2000);
                 },
-                { enableHighAccuracy: true, timeout: 15000 }
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,  // 10 giây thay vì 15
+                    maximumAge: 0    // Không dùng cache, lấy vị trí mới
+                }
             );
         }
 
         function declineGPS() {
             gpsConfirmModal.classList.remove('show');
             showToast('💡 Vui lòng nhập điểm đón');
-
-            // Nhắc lại sau 15 giây nếu chưa có điểm đón
-            setTimeout(() => {
-                const pickupInput = document.getElementById('pickupInput');
-
-                // Nếu vẫn chưa nhập điểm đón, nhắc bật GPS lại
-                if (!pickupInput.dataset.lat) {
-                    gpsConfirmModal.classList.add('show');
-                }
-            }, 15000); // 15 giây
-        }
-
-        // Kiểm tra GPS permission liên tục khi vào trang
-        let gpsCheckInterval;
-        function startGPSReminder() {
-            // Check mỗi 20 giây
-            gpsCheckInterval = setInterval(() => {
-                const pickupInput = document.getElementById('pickupInput');
-                const isModalShowing = gpsConfirmModal.classList.contains('show');
-
-                // Nếu chưa có điểm đón và modal không hiện
-                if (!pickupInput.dataset.lat && !isModalShowing) {
-                    gpsConfirmModal.classList.add('show');
-                }
-            }, 20000); // 20 giây
-        }
-
-        // Bắt đầu reminder (chỉ trên mobile)
-        if (window.innerWidth <= 900) {
-            startGPSReminder();
+            // Không nhắc lại nữa - chỉ hiện 1 lần duy nhất khi load trang
         }
 
         // Dừng reminder khi đã có điểm đón
@@ -2487,6 +2484,126 @@
                 clearInterval(gpsCheckInterval);
             }
         });
+
+        // =============================================
+        // MOBILE: SWIPE & KEYBOARD HANDLING
+        // =============================================
+        if (window.innerWidth <= 900) {
+            const sidebar = document.getElementById('bookingPanel');
+            const panelHandle = document.querySelector('.panel-handle');
+
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+            let initialHeight = 0;
+
+            // Touch events cho vuốt
+            panelHandle.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                initialHeight = sidebar.offsetHeight;
+                isDragging = true;
+                sidebar.style.transition = 'none';
+            });
+
+            panelHandle.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+
+                currentY = e.touches[0].clientY;
+                const deltaY = startY - currentY;
+
+                // Vuốt lên = tăng chiều cao, vuốt xuống = giảm chiều cao
+                let newHeight = initialHeight + deltaY;
+
+                // Giới hạn chiều cao
+                const minHeight = 120; // Thu gọn tối thiểu
+                const maxHeight = window.innerHeight * 0.85; // Mở rộng tối đa
+
+                newHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
+                sidebar.style.maxHeight = newHeight + 'px';
+            });
+
+            panelHandle.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+
+                isDragging = false;
+                sidebar.style.transition = 'max-height 0.3s ease, transform 0.3s ease';
+
+                const deltaY = startY - currentY;
+
+                // Nếu vuốt lên > 50px -> mở rộng
+                if (deltaY > 50) {
+                    sidebar.style.maxHeight = '85vh';
+                    sidebar.classList.remove('collapsed');
+                }
+                // Nếu vuốt xuống > 50px -> thu gọn
+                else if (deltaY < -50) {
+                    sidebar.style.maxHeight = '120px';
+                    sidebar.classList.add('collapsed');
+                }
+                // Nếu di chuyển ít -> quay lại trạng thái trước
+                else {
+                    if (sidebar.classList.contains('collapsed')) {
+                        sidebar.style.maxHeight = '120px';
+                    } else {
+                        sidebar.style.maxHeight = '65vh';
+                    }
+                }
+            });
+
+            // Click vào handle để toggle
+            panelHandle.addEventListener('click', () => {
+                if (sidebar.classList.contains('collapsed')) {
+                    sidebar.classList.remove('collapsed');
+                    sidebar.style.maxHeight = '65vh';
+                } else {
+                    sidebar.classList.add('collapsed');
+                    sidebar.style.maxHeight = '120px';
+                }
+            });
+
+            // Xử lý khi bàn phím ảo xuất hiện
+            const formInputs = document.querySelectorAll('.form-input');
+            let originalViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+            formInputs.forEach(input => {
+                input.addEventListener('focus', (e) => {
+                    // Mở rộng sidebar NGAY LẬP TỨC khi click vào input
+                    sidebar.classList.remove('collapsed');
+                    sidebar.style.maxHeight = '85vh';
+
+                    // Scroll input vào view ngay
+                    setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                });
+
+                input.addEventListener('blur', () => {
+                    // Cập nhật lại viewport height khi bàn phím đóng
+                    setTimeout(() => {
+                        originalViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                    }, 300);
+                });
+            });
+
+            // Lắng nghe thay đổi kích thước viewport (bàn phím mở/đóng)
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', () => {
+                    const currentHeight = window.visualViewport.height;
+                    const heightDiff = originalViewportHeight - currentHeight;
+
+                    // Bàn phím đang mở (viewport nhỏ đi > 150px)
+                    if (heightDiff > 150) {
+                        sidebar.style.maxHeight = (currentHeight * 0.7) + 'px';
+                    }
+                    // Bàn phím đóng
+                    else if (heightDiff < 50) {
+                        if (!sidebar.classList.contains('collapsed')) {
+                            sidebar.style.maxHeight = '65vh';
+                        }
+                    }
+                });
+            }
+        }
     </script>
 </body>
 </html>

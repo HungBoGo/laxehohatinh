@@ -51,6 +51,105 @@
             margin-top: 10px;
         }
 
+        /* Statistics Section */
+        .stats-section {
+            background: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stats-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .stat-value.total {
+            color: #2ECC71;
+            font-size: 18px;
+        }
+
+        .stat-value.app-fee {
+            color: #E74C3C;
+        }
+
+        .stat-value.net {
+            color: #FF6B35;
+            font-size: 18px;
+        }
+
+        /* History Section */
+        .history-section {
+            background: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-section:active {
+            transform: scale(0.98);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-date {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .history-total {
+            font-weight: bold;
+            color: #2ECC71;
+            font-size: 16px;
+        }
+
+        .history-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+            display: none;
+        }
+
+        .history-details.show {
+            display: block;
+        }
+
         .login-container {
             min-height: 100vh;
             display: flex;
@@ -381,12 +480,168 @@
                 );
             }
 
-            if (filteredOrders.length === 0) {
+            // Nếu là tab "Đơn của tôi", hiển thị thống kê
+            if (currentTab === 'my') {
+                const todayStats = calculateTodayStats();
+                const historyByDate = groupOrdersByDate();
+
+                let statsHTML = '';
+                if (todayStats.count > 0) {
+                    statsHTML = `
+                        <div class="stats-section">
+                            <div class="stats-title">📊 Thống kê hôm nay</div>
+                            <div class="stat-row">
+                                <span class="stat-label">📋 Tổng đơn đã nhận</span>
+                                <span class="stat-value">${todayStats.count} đơn</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Tổng tiền kiếm được</span>
+                                <span class="stat-value total">${todayStats.total.toLocaleString('vi-VN')}đ</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Phí App (20%)</span>
+                                <span class="stat-value app-fee">-${todayStats.appFee.toLocaleString('vi-VN')}đ</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">💵 Thực nhận</span>
+                                <span class="stat-value net">${todayStats.net.toLocaleString('vi-VN')}đ</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Hiển thị lịch sử các ngày trước
+                let historyHTML = '';
+                Object.keys(historyByDate).forEach(date => {
+                    if (date !== getTodayDate()) {
+                        const dayStats = historyByDate[date];
+                        historyHTML += `
+                            <div class="history-section" onclick="toggleHistory('${date}')">
+                                <div class="history-header">
+                                    <span class="history-date">📅 ${formatDate(date)}</span>
+                                    <span class="history-total">+${dayStats.net.toLocaleString('vi-VN')}đ</span>
+                                </div>
+                                <div class="history-details" id="history-${date}">
+                                    <div class="stat-row">
+                                        <span class="stat-label">Tổng tiền</span>
+                                        <span class="stat-value">${dayStats.total.toLocaleString('vi-VN')}đ</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Phí App (20%)</span>
+                                        <span class="stat-value app-fee">-${dayStats.appFee.toLocaleString('vi-VN')}đ</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Thực nhận</span>
+                                        <span class="stat-value net">${dayStats.net.toLocaleString('vi-VN')}đ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                // Lọc chỉ đơn hôm nay
+                const todayOrders = filteredOrders.filter(o => {
+                    const orderDate = new Date(o.createdAt).toLocaleDateString('vi-VN');
+                    return orderDate === new Date().toLocaleDateString('vi-VN');
+                });
+
+                if (todayOrders.length === 0 && !statsHTML && !historyHTML) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📭</div>
+                            <h3>Chưa có đơn nào</h3>
+                            <p>Đơn bạn nhận sẽ hiện ở đây</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                filteredOrders = todayOrders;
+
+                // Render đơn hôm nay
+                const todayOrdersHTML = filteredOrders.map(order => {
+                    const statusClass = order.status === 'accepted' ? 'status-accepted' : '';
+                    const badgeText = order.status === 'new' ? '🔔 Đơn mới' :
+                                     order.status === 'accepted' ? '✅ Đã nhận' : '✓ Hoàn thành';
+
+                    let actions = '';
+                    if (order.status === 'new') {
+                        actions = `
+                            <div class="order-actions">
+                                <button class="btn-accept" onclick="acceptOrder('${order.id}')">
+                                    ✓ Nhận đơn
+                                </button>
+                                <button class="btn-reject" onclick="rejectOrder('${order.id}')">
+                                    ✗ Từ chối
+                                </button>
+                            </div>
+                        `;
+                    } else if (order.status === 'accepted') {
+                        actions = `
+                            <button class="btn-complete" onclick="completeOrder('${order.id}')">
+                                ✓ Hoàn thành đơn
+                            </button>
+                        `;
+                    }
+
+                    return `
+                        <div class="order-card ${statusClass} ${order.status}">
+                            <div class="order-header">
+                                <span class="order-id">#${order.id}</span>
+                                <span class="order-badge">${badgeText}</span>
+                            </div>
+
+                            <div class="order-detail">
+                                <span class="order-detail-icon">📍</span>
+                                <div>
+                                    <strong>Điểm đón</strong><br>
+                                    ${order.pickup}
+                                </div>
+                            </div>
+
+                            ${order.dropoff ? `
+                            <div class="order-detail">
+                                <span class="order-detail-icon">🎯</span>
+                                <div>
+                                    <strong>Điểm đến</strong><br>
+                                    ${order.dropoff}
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <div class="order-detail">
+                                <span class="order-detail-icon">📱</span>
+                                <div>
+                                    <strong>SĐT khách</strong><br>
+                                    <a href="tel:${order.phone}" style="color: #FF6B35; text-decoration: none;">
+                                        ${order.phone}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="order-detail">
+                                <span class="order-detail-icon">📏</span>
+                                <div>${order.distance}</div>
+                            </div>
+
+                            <div class="order-price">
+                                💰 ${order.price}
+                            </div>
+
+                            ${actions}
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = statsHTML + historyHTML + todayOrdersHTML;
+                return;
+            } else if (filteredOrders.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">📭</div>
-                        <h3>${currentTab === 'new' ? 'Chưa có đơn mới' : 'Chưa có đơn nào'}</h3>
-                        <p>${currentTab === 'new' ? 'Đơn mới sẽ hiện ở đây' : 'Đơn bạn nhận sẽ hiện ở đây'}</p>
+                        <h3>Chưa có đơn mới</h3>
+                        <p>Đơn mới sẽ hiện ở đây</p>
                     </div>
                 `;
                 return;
@@ -506,6 +761,77 @@
                     alert('✅ Đã hoàn thành đơn! Chúc bạn một ngày tốt lành!');
                 }
             }
+        }
+
+        // Helper functions
+        function parsePrice(priceStr) {
+            return parseInt(priceStr.replace(/[^\d]/g, '')) || 0;
+        }
+
+        function getTodayDate() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            if (dateStr === today.toISOString().split('T')[0]) {
+                return 'Hôm nay';
+            } else if (dateStr === yesterday.toISOString().split('T')[0]) {
+                return 'Hôm qua';
+            } else {
+                return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+        }
+
+        function calculateTodayStats() {
+            const today = getTodayDate();
+            const todayOrders = orders.filter(o =>
+                o.driverPhone === currentDriver.phone &&
+                o.status === 'completed' &&
+                new Date(o.createdAt).toISOString().split('T')[0] === today
+            );
+
+            const total = todayOrders.reduce((sum, o) => sum + parsePrice(o.price), 0);
+            const appFee = Math.round(total * 0.2); // 20%
+            const net = total - appFee;
+
+            return { count: todayOrders.length, total, appFee, net };
+        }
+
+        function groupOrdersByDate() {
+            const myOrders = orders.filter(o =>
+                o.driverPhone === currentDriver.phone &&
+                o.status === 'completed'
+            );
+
+            const grouped = {};
+            myOrders.forEach(order => {
+                const date = new Date(order.createdAt).toISOString().split('T')[0];
+                if (!grouped[date]) {
+                    grouped[date] = [];
+                }
+                grouped[date].push(order);
+            });
+
+            // Calculate stats for each date
+            const stats = {};
+            Object.keys(grouped).forEach(date => {
+                const total = grouped[date].reduce((sum, o) => sum + parsePrice(o.price), 0);
+                const appFee = Math.round(total * 0.2);
+                const net = total - appFee;
+                stats[date] = { total, appFee, net, count: grouped[date].length };
+            });
+
+            return stats;
+        }
+
+        function toggleHistory(date) {
+            const details = document.getElementById(`history-${date}`);
+            details.classList.toggle('show');
         }
 
         // Check auth

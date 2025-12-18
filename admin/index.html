@@ -107,6 +107,35 @@
             color: #155724;
         }
 
+        .payment-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-btn.pending {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .payment-btn.pending:hover {
+            background: #FFB300;
+        }
+
+        .payment-btn.received {
+            background: #2ECC71;
+            color: white;
+            cursor: default;
+        }
+
+        .payment-btn.received::before {
+            content: '✓ ';
+        }
+
         .status-rejected {
             background: #F8D7DA;
             color: #721C24;
@@ -292,6 +321,21 @@
             </div>
         </div>
 
+        <div class="stats">
+            <div class="stat-card">
+                <h3>💰 Tổng doanh thu</h3>
+                <div class="number" id="totalRevenue" style="color: #2ECC71;">0đ</div>
+            </div>
+            <div class="stat-card">
+                <h3>📱 Thu nhập App (20%)</h3>
+                <div class="number" id="appRevenue" style="color: #FF6B35;">0đ</div>
+            </div>
+            <div class="stat-card">
+                <h3>🚗 Đã trả tài xế (80%)</h3>
+                <div class="number" id="driverRevenue" style="color: #3498DB;">0đ</div>
+            </div>
+        </div>
+
         <div class="orders">
             <h2 style="margin-bottom: 20px; color: #333;">📋 Danh sách đơn hàng</h2>
             <div id="ordersList"></div>
@@ -362,6 +406,27 @@
             document.getElementById('activeOrders').textContent = activeCount;
             document.getElementById('completedOrders').textContent = completedCount;
             document.getElementById('totalOrders').textContent = orders.length;
+
+            // Tính toán doanh thu từ đơn hoàn thành
+            const completedOrders = orders.filter(o => o.status === 'completed');
+            const totalRevenue = completedOrders.reduce((sum, order) => {
+                const price = parseInt(order.price.replace(/[^\d]/g, '')) || 0;
+                return sum + price;
+            }, 0);
+
+            // Chỉ tính thu nhập app từ những đơn đã nhận tiền
+            const paidOrders = orders.filter(o => o.status === 'completed' && o.paymentReceived === true);
+            const paidRevenue = paidOrders.reduce((sum, order) => {
+                const price = parseInt(order.price.replace(/[^\d]/g, '')) || 0;
+                return sum + price;
+            }, 0);
+
+            const appFee = Math.round(paidRevenue * 0.2); // 20% cho app (chỉ từ đơn đã nhận tiền)
+            const driverPayout = totalRevenue - Math.round(totalRevenue * 0.2); // 80% tổng cho tài xế
+
+            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('appRevenue').textContent = appFee.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('driverRevenue').textContent = driverPayout.toLocaleString('vi-VN') + 'đ';
         }
 
         // Render orders list
@@ -396,6 +461,19 @@
                 const driverInfo = order.driverName ?
                     `<div class="driver-info">👤 Tài xế: <span class="driver-name">${order.driverName}</span> - ${order.driverPhone}</div>` : '';
 
+                // Nút nhận tiền chỉ hiện với đơn hoàn thành
+                let paymentButton = '';
+                if (order.status === 'completed') {
+                    const price = parseInt(order.price.replace(/[^\d]/g, '')) || 0;
+                    const appFee = Math.round(price * 0.2);
+
+                    if (order.paymentReceived) {
+                        paymentButton = `<button class="payment-btn received" disabled>Đã nhận ${appFee.toLocaleString('vi-VN')}đ</button>`;
+                    } else {
+                        paymentButton = `<button class="payment-btn pending" onclick="markPaymentReceived('${order.id}')">💵 Nhận ${appFee.toLocaleString('vi-VN')}đ từ tài xế</button>`;
+                    }
+                }
+
                 return `
                     <div class="order-card">
                         <div class="order-header">
@@ -423,9 +501,21 @@
                             🕐 ${new Date(order.createdAt).toLocaleString('vi-VN')}
                         </div>
                         ${driverInfo}
+                        ${paymentButton}
                     </div>
                 `;
             }).join('');
+        }
+
+        // Mark payment as received
+        function markPaymentReceived(orderId) {
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+                orders[orderIndex].paymentReceived = true;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                updateStats();
+                renderOrders();
+            }
         }
 
         // Check auth on load
