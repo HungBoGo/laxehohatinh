@@ -1462,9 +1462,8 @@
         // CẤU HÌNH - THAY ĐỔI THÔNG TIN TẠI ĐÂY
         // =============================================
         const CONFIG = {
-            // Webhook URL để nhận đơn hàng
-            // Thay bằng URL Railway của bạn sau khi deploy
-            WEBHOOK_URL: 'https://laixehohatinh-server.up.railway.app/api/orders',
+            // Webhook URL để nhận đơn hàng (production: https://laixehohatinh.com/api/orders)
+            WEBHOOK_URL: 'https://laixehohatinh.com/api/orders',
             
             // Số hotline
             HOTLINE: '0777.13.13.55',
@@ -2111,7 +2110,7 @@
                 pickup: orderData.pickup,
                 dropoff: orderData.dropoff,
                 phone: orderData.phone,
-                price: formatPrice(orderData.price),
+                price: orderData.price.toLocaleString('vi-VN') + 'đ',
                 distance: orderData.distance.toFixed(1) + ' km',
                 status: 'new',
                 createdAt: new Date().toISOString(),
