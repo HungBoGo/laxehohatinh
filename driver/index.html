@@ -446,7 +446,40 @@
             document.getElementById('headerDriverName').textContent = `👤 ${currentDriver.name}`;
 
             loadOrders();
-            setInterval(loadOrders, 5000); // Refresh every 5s
+
+            // Refresh every 3s to check for new orders
+            setInterval(() => {
+                const savedOrders = localStorage.getItem('orders');
+                if (savedOrders) {
+                    const newOrders = JSON.parse(savedOrders);
+
+                    // Kiểm tra xem có đơn mới không
+                    const oldNewOrdersCount = orders.filter(o => o.status === 'new').length;
+                    const newOrdersCount = newOrders.filter(o => o.status === 'new').length;
+
+                    // Cập nhật orders và render lại nếu có thay đổi
+                    if (JSON.stringify(newOrders) !== JSON.stringify(orders)) {
+                        orders = newOrders;
+                        renderOrders();
+
+                        // Thông báo có đơn mới
+                        if (newOrdersCount > oldNewOrdersCount) {
+                            // Có đơn mới
+                            if ('Notification' in window && Notification.permission === 'granted') {
+                                new Notification('🔔 Đơn mới!', {
+                                    body: 'Có đơn mới vừa được đặt',
+                                    icon: '../favicon.ico'
+                                });
+                            }
+                        }
+                    }
+                }
+            }, 3000); // Refresh every 3s
+
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
         }
 
         // Switch tab
